@@ -26,6 +26,9 @@ const MobileNavbar = () => {
                                 <Link href="/">
                                     <Button variant="ghost" className="text-md font-medium">Home</Button>
                                 </Link>
+                                <Link href="/compress">
+                                    <Button variant="ghost" className="text-sm lg:text-lg font-medium">Compressor</Button>
+                                </Link>
                                 <Link href="/about">
                                     <Button variant="ghost" className="text-md font-medium">About</Button>
                                 </Link>

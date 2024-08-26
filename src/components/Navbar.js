@@ -9,9 +9,12 @@ const Navbar = () => {
     return (
         <nav className="flex items-center justify-between  max-sm:px-5 sm:px-5 md:px-20 py-10">
             <h2 className="text-3xl font-bold text-[#e5322d]">Converto</h2>
-            <div className="hidden md:flex gap-3">
+            <div className="hidden lg:flex gap-3">
                 <Link href="/">
                     <Button variant="ghost" className="text-sm lg:text-lg font-medium">Home</Button>
+                </Link>
+                <Link href="/compress">
+                    <Button variant="ghost" className="text-sm lg:text-lg font-medium">Compressor</Button>
                 </Link>
                 <Link href="/about">
                     <Button variant="ghost" className="text-sm lg:text-lg font-medium">About</Button>
@@ -20,7 +23,7 @@ const Navbar = () => {
                     <Button variant="ghost" className="text-sm lg:text-lg font-medium">Privacy Policy</Button>
                 </Link>
             </div>
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-3">
                 <Button variant="ghost" className="">
                     <MoonIcon className="h-5 w-5"/>
                     {/* <SunIcon className="h-5 w-5"/> */}
@@ -32,7 +35,7 @@ const Navbar = () => {
                     </Button>
                 </Link>
             </div>
-            <div className="md:hidden block">
+            <div className="lg:hidden block">
                 <MobileNavbar />
             </div>
         </nav>
