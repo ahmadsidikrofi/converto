@@ -19,6 +19,7 @@ import CompressFileName from "../../utils/compress-file-name"
 import ConvertFile from "../../utils/convertFile"
 import { FFmpeg } from "@ffmpeg/ffmpeg"
 import { useEffect, useRef, useState } from "react"
+import { Action } from "../../types.d"
 const extensions = {
     image: [
       "jpg",
@@ -90,14 +91,14 @@ const Dropzone = () => {
         setFiles(data)
         const tmp = []
         data.forEach((file) => {
-            const formData = new formData()
+            // const formData = new FormData()
             tmp.push({
                 file_name: file.name,
                 file_size: file.size,
                 from: file.name.slice(((file.name.lastIndexOf(".") - 1) >>> 0) + 2),
                 to: null,
                 file_type: file.type,
-                file,
+                file: file,
                 is_converted: false,
                 is_converting: false,
                 is_error: false
@@ -143,18 +144,22 @@ const Dropzone = () => {
     }, [actions])
     useEffect(() => {
         load()
-    })
+    }, [])
     const load = async () => {
         const ffmpeg_response = await LoadFfmpeg()
         ffmpegRef.current = ffmpeg_response
+        setIsLoaded(true)
+        setTimeout(() => {
+            setIsLoaded(false)
+        }, 3000)
     }
 
     if (actions.length) {
         return (
             <div className="space-y-6">
-                {actions.map((action, i) => {
+                {actions.map((action, i) => (
                     <div key={i} className="w-full py-4 space-y-2 lg:py-0 relative cursor-pointer rounded-xl border h-fit lg:h-20 px-4 lg:px-10 flex flex-wrap lg:flex-nowrap items-center justify-between">
-                        {!isLoaded && (
+                        {isLoaded && (
                             <Skeleton className="h-full w-full -ml-10 cursor-progress absolute rounded-xl" />
                         )}
                         <div className="flex items-center gap-1 w-96">
@@ -163,7 +168,7 @@ const Dropzone = () => {
                             </span>
                         </div>
                     </div>
-                })}
+                ))}
             </div>
         )
     }

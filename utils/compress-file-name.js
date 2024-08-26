@@ -1,12 +1,12 @@
-export default function CompressFileName(fileName) {
+export default function CompressFileName(file_name) {
     const maxSubstrLength = 18;
 
-    // Check if the fileName is longer than the maximum length
-    if (fileName.length > maxSubstrLength) {
-      const fileNameWithoutExtension = fileName.split('.').slice(0, -1).join('.');
+    // Check if the file_name is longer than the maximum length
+    if (file_name.length > maxSubstrLength) {
+      const fileNameWithoutExtension = file_name.split('.').slice(0, -1).join('.');
   
-      // Extract the extension from the fileName
-      const fileExtension = fileName.split('.').pop();
+      // Extract the extension from the file_name
+      const fileExtension = file_name.split('.').pop();
   
       // Calculate the length of characters to keep in the middle
       const charsToKeep =
@@ -24,6 +24,6 @@ export default function CompressFileName(fileName) {
   
       return compressedFileName
     } else {
-        return fileName.trim();
+        return file_name.trim();
     }
 }

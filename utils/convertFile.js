@@ -1,5 +1,6 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
+import { Action } from "../types.d";
 
 const getFileExtension = ( file_name) => {
     const regex = /(?:\.([^.]+))?$/
