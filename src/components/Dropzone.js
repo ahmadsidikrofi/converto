@@ -1,5 +1,5 @@
 'use client'
-import { FileIcon, UploadIcon } from "@radix-ui/react-icons"
+import { FileIcon, TrashIcon, UploadIcon } from "@radix-ui/react-icons"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -134,6 +134,10 @@ const Dropzone = () => {
         setIsReady(tmpReady)
     }
 
+    const handleRemoveFile = (fileName) => {
+        setActions(actions.filter((action) => action.file_name !== fileName))
+    }
+
     useEffect(() => {
         if (!actions.length) {
             setIsDone(false)
@@ -167,8 +171,88 @@ const Dropzone = () => {
                                 {CompressFileName(action.file_name)}
                             </span>
                         </div>
+                        <div className="flex items-center gap-1 w-96">
+                            <span className="text-md font-medium overflow-x-hidden">
+                                {ByteToSize(action.file_size)}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-4 w-96">
+                            <span className="text-md font-medium overflow-x-hidden text-muted-foreground">Convert to</span>
+                            <Select
+                                onValueChange={(value) => {
+                                    if (extensions.video.includes(value)) {
+                                        setDefaultValues('video')
+                                    } else if (extensions.audio.includes(value)) {
+                                        setDefaultValues('audio')
+                                    }
+                                    setSelected(value)
+                                }}
+                                value={selected}
+                            >
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Type" />
+                                </SelectTrigger>
+                                <SelectContent className='h-fit'>
+                                    {action.file_type.includes('image') ? 
+                                        <div className="grid grid-cols-3 ">
+                                            {extensions.image.map((image, i) => (
+                                                <div key={i} className="mx-auto">
+                                                    <SelectItem value={image}>{image}</SelectItem>
+                                                </div>
+                                            ))}
+                                        </div> : null           
+                                    }
+                                    {action.file_type.includes('video') ?
+                                        <div>
+                                            <Tabs defaultValue={defaultValues} className="w-[300px]">
+                                                <TabsList className="w-full grid grid-cols-2">
+                                                    <TabsTrigger value="video">Video</TabsTrigger>
+                                                    <TabsTrigger value="audio">Audio</TabsTrigger>
+                                                </TabsList>
+                                                <TabsContent value="video">
+                                                    <div className="grid grid-cols-3 ">
+                                                        {extensions.video.map((video, i) => (
+                                                            <div key={i} className="mx-auto">
+                                                                <SelectItem value={video}>{video}</SelectItem>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </TabsContent>
+                                                <TabsContent value="audio">
+                                                    <div className="grid grid-cols-2">
+                                                        {extensions.audio.map((audio) => (
+                                                            <div key={i} className="mx-auto">
+                                                                <SelectItem value={audio}>{audio}</SelectItem>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </TabsContent>
+                                            </Tabs>
+                                        </div>
+                                        :null
+                                    }
+                                    {action.file_type.includes('audio') ? 
+                                        <div className="grid grid-cols-2">
+                                            {extensions.audio.map((audio, i) => (
+                                                <div key={i} className="mx-auto">
+                                                    <SelectItem value={audio}>{audio}</SelectItem>
+                                                </div>
+                                            ))}
+                                        </div> : null
+                                    }
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div>
+                            <Button onClick={() => handleRemoveFile(action.file_name)} variant='ghost' className='rounded-full'>
+                                <TrashIcon className="w-6 h-6" />
+                            </Button>
+                        </div>
                     </div>
                 ))}
+                <div className="flex justify-end">
+                    <Button className='bg-[#e5322d] hover:bg-red-500 hover:rounded-xl p-5 text-md transition-all ease-in-out'>Convert Now</Button>
+                </div>
             </div>
         )
     }

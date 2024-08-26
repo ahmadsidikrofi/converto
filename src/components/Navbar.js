@@ -25,10 +25,12 @@ const Navbar = () => {
                     <MoonIcon className="h-5 w-5"/>
                     {/* <SunIcon className="h-5 w-5"/> */}
                 </Button>
-                <Button className="rounded-full bg-slate-800 p-3 flex items-center justify-center gap-3 hover:bg-white  hover:text-slate-800">
-                    <p className="">Github Repo</p> 
-                    <GitHubLogoIcon className="w-4 h-4"/>
-                </Button>
+                <Link target="_blank" href="https://github.com/ahmadsidikrofi/converto">
+                    <Button className="rounded-full bg-slate-800 p-3 flex items-center justify-center gap-3 hover:bg-white  hover:text-slate-800">
+                        <p className="">Github Repo</p> 
+                        <GitHubLogoIcon className="w-4 h-4"/>
+                    </Button>
+                </Link>
             </div>
             <div className="md:hidden block">
                 <MobileNavbar />
