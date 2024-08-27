@@ -7,9 +7,10 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet"
-import { HamburgerMenuIcon } from "@radix-ui/react-icons"
+import { GitHubLogoIcon, HamburgerMenuIcon } from "@radix-ui/react-icons"
 import Link from "next/link"
 import { Button } from "./ui/button"
+import { MoonStars } from "@phosphor-icons/react"
 
 const MobileNavbar = () => {
     return (
@@ -19,6 +20,12 @@ const MobileNavbar = () => {
                 <SheetContent>
                     <SheetHeader>
                         <SheetTitle className="mt-10 text-center">
+                            <div className="flex gap-2 justify-center mb-5">
+                                <Button variant='outline'><MoonStars className="w-4 h-4" /></Button>
+                                <Link target="_blank" href="https://github.com/ahmadsidikrofi/converto">
+                                    <Button variant='outline'><GitHubLogoIcon className="w-4 h-4" /></Button>
+                                </Link>
+                            </div>
                             <h2 className="text-xl font-bold text-[#e5322d]">Converto</h2>
                         </SheetTitle>
                         <SheetDescription>

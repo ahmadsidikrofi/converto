@@ -10,7 +10,7 @@ import LoadFfmpeg from "../../utils/load-ffmpeg"
 import { Button } from "./ui/button"
 import imageCompression from 'browser-image-compression'
 import { Skeleton } from "./ui/skeleton"
-import { TrayArrowUp } from "@phosphor-icons/react"
+import { FilePng, TrayArrowUp } from "@phosphor-icons/react"
 
 const extensions = {
     image: [
@@ -245,8 +245,8 @@ const DropzoneCompressor = () => {
                     <div>
                         {isHover ? (
                             <>
-                                <div className="flex flex-col items-center justify-center gap-3 ">
-                                    <FileIcon className="w-14 h-14 text-[#e5322d]" />
+                                <div className="flex flex-col items-center justify-center gap-3 my-3">
+                                    <FilePng className="w-14 h-14 text-[#e5322d]"/>
                                     <p className="md:text-xl sm:text-sm max-sm:text-sm font-semibold">Drop it here 🤩</p>
                                 </div>
                             </>

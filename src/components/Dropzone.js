@@ -21,7 +21,7 @@ import { FFmpeg } from "@ffmpeg/ffmpeg"
 import { useEffect, useRef, useState } from "react"
 import { Action } from "../../types.d"
 import IconFile from "../../utils/icon-file"
-import { BoxArrowUp } from "@phosphor-icons/react"
+import { BoxArrowUp, FileIni, Warning } from "@phosphor-icons/react"
 const extensions = {
     image: [
       "jpg",
@@ -34,7 +34,6 @@ const extensions = {
       "tif",
       "tiff",
       "svg",
-      "raw",
       "tga",
     ],
     video: [
@@ -69,6 +68,7 @@ const Dropzone = () => {
     const [isDone, setIsDone] = useState(false)
     const ffmpegRef = useRef(null)
     const [defaultValues, setDefaultValues] = useState("video")
+    const [hoverFileType, setHoverFileType] = useState(null)
     const [selected, setSelected] = useState('...')
     const accepted_files = {
         "image/*": [
@@ -152,13 +152,13 @@ const Dropzone = () => {
                             output: result.output
                         };
                     } catch (err) {
-                        console.error('Error converting file:', action.file_name, err);
+                        console.error('Error converting file:', action.file_name, err)
                         return {
                             ...action,
                             is_converted: false,
                             is_converting: false,
                             is_error: true
-                        };
+                        }
                     }
                 })
             )
@@ -167,16 +167,27 @@ const Dropzone = () => {
             setIsConvert(false)
             setIsDone(true)
 
-            toast({
-                title: "Conversion Successful!",
-                description: "All files have been converted successfully.",
-            })
+            const hasError = convertedFiles.some(fileAction => fileAction.is_error)
+            if (!hasError) {
+                toast({
+                    title: "Conversion Successfull",
+                    description: "All files has been converted successfully.",
+                    duration: 3000
+                })
+            } else {
+                toast({
+                    title: "Conversion Failed",
+                    description: "There was an error converting one or more files.",
+                    duration: 3000
+                })
+            }
         } catch (error) {
             console.error('Conversion failed', error);
             toast({
                 title: "Conversion Failed",
                 description: "There was an error converting the files.",
-            });
+                duration: 3000
+            })
             setIsLoaded(false);
         }    
     }
@@ -204,6 +215,10 @@ const Dropzone = () => {
         setActions([])
         setFiles([])
         setIsReady(false)
+    }
+
+    const handleDownloadFile = () => {
+        
     }
 
     useEffect(() => {
@@ -260,9 +275,11 @@ const Dropzone = () => {
                                 <CircleIcon className="animate-spin" />
                             </Badge>
                         ) : action.is_error ? (
-                            <Badge variant='destructive' className="p-1 lg:mx-20 lg:w-[35%]">
+                            <Badge variant='destructive' className="p-1 lg:mx-20 lg:w-[25rem] flex gap-2">
                                 <span>Failed when converting</span>
+                                <Warning className="w-4 h-4"/>
                             </Badge>
+
                         ) : (
                             <div className="flex items-center gap-4 w-96">
                                 <span className="text-md text-nowrap font-medium overflow-x-hidden text-muted-foreground">Convert to</span>
@@ -349,7 +366,7 @@ const Dropzone = () => {
                 <div className="flex justify-end">
                     {isDone ? (
                         <div className="flex flex-col justify-center gap-3">
-                            <Button className='bg-[#e5322d] hover:bg-red-500 p-5'>{actions.length > 1 ? "Download all" : "Download file"}</Button>
+                            <Button onClick={handleDownloadFile} className='bg-[#e5322d] hover:bg-red-500 p-5'>{actions.length > 1 ? "Download all" : "Download file"}</Button>
                             <Button onClick={resetFile} variant='outline' className='p-5'>Convert another file(s)</Button>
                         </div>
                     ) : (
@@ -385,7 +402,7 @@ const Dropzone = () => {
                     variant: 'destructive',
                     title: 'Error when upload file(s)',
                     description: 'Allowed files: Audio, Image, Video',
-                    duration: 4000,
+                    duration: 3000,
                 })
             }}
             onError={() => {
@@ -403,8 +420,8 @@ const Dropzone = () => {
                     <div>
                         {isHover ? (
                             <>
-                                <div className="flex flex-col items-center justify-center gap-3 ">
-                                    <FileIcon className="w-14 h-14 text-[#e5322d]" />
+                                <div className="flex flex-col items-center justify-center gap-3 my-3">
+                                    <FileIni className="w-14 h-14 text-[#e5322d]"/>
                                     <p className="md:text-xl sm:text-sm max-sm:text-sm font-semibold">Drop it here 🤩</p>
                                 </div>
                             </>
