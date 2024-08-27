@@ -11,6 +11,7 @@ import { Button } from "./ui/button"
 import imageCompression from 'browser-image-compression'
 import { Skeleton } from "./ui/skeleton"
 import { FilePng, TrayArrowUp } from "@phosphor-icons/react"
+import JSZip from "jszip"
 
 const extensions = {
     image: [
@@ -126,7 +127,7 @@ const DropzoneCompressor = () => {
             console.log('Compressed file:', compressedFile)
             // Update actions with the compressed file
             setActions(prevActions => prevActions.map(action => 
-                action.file_name === file.name ? { ...action, file: compressedFile, file_size: compressedFile.size, is_compressing: false } : action
+                action.file_name === file.name ? { ...action, file: compressedFile, file_size: compressedFile.size, is_compressing: false, is_compressed: true } : action
             ))
             setIsDone(true)
         } catch (error) {
@@ -147,6 +148,36 @@ const DropzoneCompressor = () => {
         setFiles([])
         setIsReady(false)
     }
+    
+    const handleDownloadFile = () => {
+        if (actions.length > 1) {
+            const zip = new JSZip()
+            actions.forEach((action) => {
+                if (action.is_compressed && action.file) {
+                    zip.file(action.file_name, action.file)                    
+                }
+            })
+            zip.generateAsync({ type: 'blob' }).then((content) => {
+                const link = document.createElement('a')
+                link.href = URL.createObjectURL(content)
+                link.download = 'compressed_file.zip'
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+            })
+        } else {
+            const action = actions[0]
+            if (action.is_compressed && action.file) {
+                const link = document.createElement('a')
+                link.href = URL.createObjectURL(action.file)
+                link.download = action.file_name
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+            }
+        }
+    }
+
     const load = async () => {
         const ffmpeg_response = await LoadFfmpeg()
         ffmpegRef.current = ffmpeg_response
@@ -207,7 +238,7 @@ const DropzoneCompressor = () => {
                 <div className="flex justify-end">
                     {isDone ? (
                         <div className="flex flex-col justify-center gap-3">
-                            <Button className='bg-[#e5322d] hover:bg-red-500 p-5'>{actions.length > 1 ? "Download all" : "Download file"}</Button>
+                            <Button onClick={handleDownloadFile} className='bg-[#e5322d] hover:bg-red-500 p-5'>{actions.length > 1 ? "Download all" : "Download file"}</Button>
                             <Button onClick={resetFile} variant='outline' className='p-5'>Compress another file(s)</Button>
                         </div>
                     ) : null }
