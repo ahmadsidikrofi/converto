@@ -6,8 +6,8 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Converto - Unlimited File Converter",
-  description: "Unlimited File Converter",
+  title: "Converto - Infinite File Converter",
+  description: "Infinite File Converter",
   creator: "Ahmad Sidik Rofiudin",
   keywords: "image converter, audio converter, video converter, unlimited image converter, unlimited video converter, unlimited audio converter, free convert image, free convert audio, converter image online, converter audio online, converter video online"
 };
@@ -15,6 +15,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <link rel="icon" type="image/png" sizes="16x16" href="/Converto-logo.png"></link>
       <body className={inter.className}>
         <Navbar />
         <main>

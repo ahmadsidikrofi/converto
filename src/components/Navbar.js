@@ -4,23 +4,27 @@ import { GitHubLogoIcon, MoonIcon, SunIcon } from "@radix-ui/react-icons"
 import { Button } from "./ui/button"
 import Link from "next/link"
 import MobileNavbar from "./MobileNavbar"
+import Image from "next/image"
 
 const Navbar = () => {
     return (
-        <nav className="flex items-center justify-between  max-sm:px-5 sm:px-5 md:px-20 py-10">
-            <h2 className="text-3xl font-bold text-[#e5322d]">Converto</h2>
+        <nav className="flex items-center justify-between  max-sm:px-5 sm:px-5 md:px-16 py-10">
+            <Link href="/" className='flex items-center gap-2'>
+                <Image src="/Converto-logo.png" width={728} height={728} alt='Converto Logo' className='w-10' />
+                <h2 className="text-3xl font-bold text-[#e5322d]">Converto</h2>
+            </Link>
             <div className="hidden lg:flex gap-3">
                 <Link href="/">
-                    <Button variant="ghost" className="text-sm lg:text-lg font-medium">Home</Button>
+                    <Button variant="ghost" className="lg:text-lg font-medium">Home</Button>
                 </Link>
                 <Link href="/compress">
-                    <Button variant="ghost" className="text-sm lg:text-lg font-medium">Compressor</Button>
+                    <Button variant="ghost" className="lg:text-lg font-medium">Compressor</Button>
                 </Link>
                 <Link href="/about">
-                    <Button variant="ghost" className="text-sm lg:text-lg font-medium">About</Button>
+                    <Button variant="ghost" className="lg:text-lg font-medium">About</Button>
                 </Link>
                 <Link href="/privacy-policy">
-                    <Button variant="ghost" className="text-sm lg:text-lg font-medium">Privacy Policy</Button>
+                    <Button variant="ghost" className="lg:text-lg font-medium">Privacy Policy</Button>
                 </Link>
             </div>
             <div className="hidden lg:flex items-center gap-3">

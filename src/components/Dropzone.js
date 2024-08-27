@@ -1,5 +1,5 @@
 'use client'
-import { CheckCircledIcon, CircleIcon, EyeClosedIcon, FileIcon, TrashIcon, UploadIcon } from "@radix-ui/react-icons"
+import { BoxIcon, CheckCircledIcon, CircleIcon, FileIcon, TrashIcon } from "@radix-ui/react-icons"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -21,7 +21,7 @@ import { FFmpeg } from "@ffmpeg/ffmpeg"
 import { useEffect, useRef, useState } from "react"
 import { Action } from "../../types.d"
 import IconFile from "../../utils/icon-file"
-import { Close, WarningProvider } from "@radix-ui/react-dialog"
+import { BoxArrowUp } from "@phosphor-icons/react"
 const extensions = {
     image: [
       "jpg",
@@ -56,7 +56,7 @@ const extensions = {
       "265",
     ],
     audio: ["mp3", "wav", "ogg", "aac", "wma", "flac", "m4a"],
-  };
+};
 
 const Dropzone = () => {
     const { toast } = useToast()
@@ -339,7 +339,7 @@ const Dropzone = () => {
                                     <span>Download</span>
                                 </Button>
                             ) : (
-                                <Button onClick={() => handleRemoveFile(action.file_name)} variant='ghost' className='rounded-full p-3'>
+                                <Button onClick={() => handleRemoveFile(action.file_name)} variant='ghost' className='mx-3 p-3'>
                                     <TrashIcon className="w-6 h-6" />
                                 </Button>
                             )}
@@ -410,9 +410,12 @@ const Dropzone = () => {
                             </>
                         ) : (
                             <>
-                                <div className="flex flex-col items-center justify-center gap-3 ">
-                                    <UploadIcon className="w-14 h-14 text-[#e5322d]" />
-                                    <p className="md:text-xl sm:text-sm max-sm:text-sm font-semibold">Select your files</p>
+                                <div className="flex flex-col items-center justify-center gap-3 my-3">
+                                    <BoxArrowUp weight="duotone" className="w-14 h-14 text-[#e5322d]" />
+                                    <div className="flex flex-col">
+                                        <p className="md:text-xl sm:text-sm max-sm:text-sm font-semibold">Select your file(s)</p>
+                                        <p className="text-sm text-muted-foreground">or just drop here</p>
+                                    </div>
                                 </div>
                             </>
                         )}
