@@ -205,17 +205,28 @@ const DropzoneCompressor = () => {
         return (
             <div className="space-y-6">
                 {actions.filter(action => action.file_type.includes('image')).map((action, i) => (
-                    <div key={i} className="w-full py-4 space-y-2 lg:py-0 relative cursor-pointer rounded-xl border h-fit lg:h-20 px-4 lg:px-10 flex flex-wrap lg:flex-nowrap items-center justify-between">
-                        <div className="flex items-center gap-4 w-full">
-                            <span className="text-red-500">
+                    <div key={i} className="w-full py-4 space-y-2 lg:py-0 relative cursor-pointer rounded-xl border max-sm:border-none h-fit lg:h-20 max-sm:px-0 px-4 lg:px-10 flex flex-wrap lg:flex-nowrap items-center justify-between">
+                        <div className="flex items-center gap-4 w-full max-sm:px-8">
+                            <span className="text-red-500  sm:text-sm max-sm:text-sm">
                                 {IconFile(action.file_type)}
                             </span>
-                            <span className="text-md font-medium overflow-x-hidden">
-                                {CompressFileName(action.file_name)}
-                            </span>
+                            <div className="flex items-center gap-2">
+                                <span className="text-md font-medium overflow-x-hidden max-sm:text-[12px]">
+                                    {CompressFileName(action.file_name)}
+                                </span>
+                                {action.is_compressing ? (
+                                    <div className="space-y-2 max-sm:block hidden">
+                                        <Skeleton className="h-4 w-[50px]" /> 
+                                    </div>
+                                ) : (
+                                    <span className="text-md font-medium overflow-x-hidden max-sm:block hidden text-muted-foreground text-[10px]">
+                                        ({ByteToSize(action.file_size)})
+                                    </span>
+                                )}
+                            </div>
                         </div>
                         <div className="flex items-center gap-1 w-96">
-                            <span className="text-md font-medium overflow-x-hidden">
+                            <span className="text-md font-medium overflow-x-hidden max-sm:hidden">
                                 {action.is_compressing ? (
                                     <div className="space-y-2">
                                         <Skeleton className="h-4 w-[80px]" /> 
@@ -225,10 +236,13 @@ const DropzoneCompressor = () => {
                                 )}
                             </span>
                         </div>
-                        <div className="flex items-center gap-1 w-96">
+                        <div className="flex items-center gap-1 w-96 max-sm:px-8 max-sm:justify-between">
                             <Button disabled={action.is_compressing ? true : false} onClick={() => handleCompressImage(action.file)} variant='outline'>Compress now</Button>
+                            <Button onClick={() => handleRemoveFile(action.file_name)} variant='ghost' className='p-3 max-sm:block hidden'>
+                                <TrashIcon className="w-6 h-6" />
+                            </Button>
                         </div>
-                        <div className="flex justify-end">
+                        <div className="flex justify-end max-sm:hidden">
                             <Button onClick={() => handleRemoveFile(action.file_name)} variant='ghost' className='p-3'>
                                 <TrashIcon className="w-6 h-6" />
                             </Button>

@@ -247,20 +247,25 @@ const Dropzone = () => {
         return (
             <div className="space-y-6">
                 {actions.map((action, i) => (
-                    <div key={i} className="w-full py-4 space-y-2 lg:py-0 relative cursor-pointer rounded-xl border h-fit lg:h-20 px-4 lg:px-10 flex flex-wrap lg:flex-nowrap items-center justify-between">
+                    <div key={i} className="w-full py-4 space-y-2 lg:py-0 relative cursor-pointer rounded-xl border max-sm:border-none h-fit lg:h-20 max-sm:px-0 px-4 lg:px-10 flex flex-wrap lg:flex-nowrap items-center justify-between">
                         {/* {!isLoaded && (
                             <Skeleton className="h-full w-full -ml-10 cursor-progress absolute rounded-xl" />
                         )} */}
-                        <div className="flex items-center gap-4 w-full">
-                            <span className="text-red-500">
+                        <div className="flex items-center gap-4 w-full max-sm:px-8">
+                            <span className="text-red-500 sm:text-sm max-sm:text-sm">
                                 {IconFile(action.file_type)}
                             </span>
-                            <span className="text-md font-medium overflow-x-hidden">
-                                {CompressFileName(action.file_name)}
-                            </span>
+                            <div className="flex items-center gap-2">
+                                <span className="text-md font-medium overflow-x-hidden max-sm:text-[12px]">
+                                    {CompressFileName(action.file_name)}
+                                </span>
+                                <span className="text-md font-medium overflow-x-hidden max-sm:block hidden text-muted-foreground text-[10px]">
+                                    ({ByteToSize(action.file_size)})
+                                </span>
+                            </div>
                         </div>
                         <div className="flex items-center gap-1 w-96">
-                            <span className="text-md font-medium overflow-x-hidden">
+                            <span className="text-md font-medium overflow-x-hidden max-sm:hidden">
                                 {ByteToSize(action.file_size)}
                             </span>
                         </div>
@@ -281,8 +286,8 @@ const Dropzone = () => {
                             </Badge>
 
                         ) : (
-                            <div className="flex items-center gap-4 w-96">
-                                <span className="text-md text-nowrap font-medium overflow-x-hidden text-muted-foreground">Convert to</span>
+                            <div className="flex items-center gap-4 w-96 max-sm:px-8 max-sm:justify-between">
+                                <span className="max-sm:text-[12px] text-md text-nowrap font-medium overflow-x-hidden text-muted-foreground">Convert to</span>
                                 <Select
                                     onValueChange={(value) => {
                                         if (extensions.video.includes(value)) {
@@ -348,6 +353,9 @@ const Dropzone = () => {
                                         }
                                     </SelectContent>
                                 </Select>
+                                <Button onClick={() => handleRemoveFile(action.file_name)} variant='ghost' className='mx-3 p-3 max-sm:block hidden'>
+                                    <TrashIcon className="w-6 h-6" />
+                                </Button>
                             </div>
                         )}
                         <div className="flex justify-end">
@@ -356,7 +364,7 @@ const Dropzone = () => {
                                     <span>Download</span>
                                 </Button>
                             ) : (
-                                <Button onClick={() => handleRemoveFile(action.file_name)} variant='ghost' className='mx-3 p-3'>
+                                <Button onClick={() => handleRemoveFile(action.file_name)} variant='ghost' className='mx-3 p-3 max-sm:hidden'>
                                     <TrashIcon className="w-6 h-6" />
                                 </Button>
                             )}
