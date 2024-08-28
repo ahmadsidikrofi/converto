@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/toaster"
+import ThemeProvider from "@/components/ui/theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,14 +15,21 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <link rel="icon" type="image/png" sizes="16x16" href="/Converto-logo.png"></link>
       <body className={inter.className}>
-        <Navbar />
-        <main>
-          {children}
-        </main>
-        <Toaster />
+        <ThemeProvider
+          atrribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Navbar />
+          <main>
+            {children}
+          </main>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

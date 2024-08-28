@@ -21,7 +21,7 @@ import { FFmpeg } from "@ffmpeg/ffmpeg"
 import { useEffect, useRef, useState } from "react"
 import { Action } from "../../types.d"
 import IconFile from "../../utils/icon-file"
-import { BoxArrowUp, FileIni, Warning } from "@phosphor-icons/react"
+import { BoxArrowUp, FileIni, SpinnerGap, Warning } from "@phosphor-icons/react"
 const extensions = {
     image: [
       "jpg",
@@ -270,17 +270,17 @@ const Dropzone = () => {
                             </span>
                         </div>
                         {action.is_converted ? (
-                            <Badge className="bg-emerald-600 flex gap-2 items-center p-1 lg:mx-20">
+                            <Badge className="bg-emerald-600 flex gap-2 items-center p-1 lg:mx-20 max-sm:mx-8">
                                 <span>Done</span>
                                 <CheckCircledIcon />
                             </Badge>
                         ) : action.is_converting ? (
-                            <Badge className="flex gap-2 items-center p-1 lg:mx-20">
+                            <Badge className="flex gap-2 items-center p-1 lg:mx-20 max-sm:mx-8">
                                 <span>Converting</span>
-                                <CircleIcon className="animate-spin" />
+                                <SpinnerGap className="animate-spin" />
                             </Badge>
                         ) : action.is_error ? (
-                            <Badge variant='destructive' className="p-1 lg:mx-20 lg:w-[25rem] flex gap-2">
+                            <Badge variant='destructive' className="p-1 lg:mx-20 lg:w-[25rem] flex gap-2 max-sm:mx-8">
                                 <span>Failed when converting</span>
                                 <Warning className="w-4 h-4"/>
                             </Badge>
@@ -360,7 +360,7 @@ const Dropzone = () => {
                         )}
                         <div className="flex justify-end">
                             {action.is_converted ? (
-                                <Button variant='outline' className='p-3'>
+                                <Button variant='outline' className='p-3 max-sm:mx-8'>
                                     <span>Download</span>
                                 </Button>
                             ) : (
@@ -373,26 +373,28 @@ const Dropzone = () => {
                 ))}
                 <div className="flex justify-end">
                     {isDone ? (
-                        <div className="flex flex-col justify-center gap-3">
+                        <div className="flex flex-col justify-center gap-3 max-sm:mx-8">
                             <Button onClick={handleDownloadFile} className='bg-[#e5322d] hover:bg-red-500 p-5'>{actions.length > 1 ? "Download all" : "Download file"}</Button>
                             <Button onClick={resetFile} variant='outline' className='p-5'>Convert another file(s)</Button>
                         </div>
                     ) : (
-                        <Button disabled={!isReady || isConverting} onClick={handleConvert} className='bg-[#e5322d] hover:bg-red-500 hover:rounded-xl p-5 text-md transition-all ease-in-out'>
-                            {isConverting ? (
-                                <div className="flex gap-2 items-center">
-                                    <span className="animate-spin text-lg">
-                                        <CircleIcon />
-                                    </span>
+                        <div className="max-sm:px-8">
+                            <Button disabled={!isReady || isConverting} onClick={handleConvert} className='bg-[#e5322d] hover:bg-red-500 hover:rounded-xl p-5 text-md max-sm:text-sm transition-all ease-in-out'>
+                                {isConverting ? (
+                                    <div className="flex gap-2 items-center">
+                                        <span className="animate-spin text-lg">
+                                            <SpinnerGap className="animate-spin" />
+                                        </span>
+                                        <span>Convert Now</span>
+                                        <span className="animate-spin text-lg">
+                                            <SpinnerGap className="animate-spin" />
+                                        </span>
+                                    </div>
+                                ) : (
                                     <span>Convert Now</span>
-                                    <span className="animate-spin text-lg">
-                                        <CircleIcon />
-                                    </span>
-                                </div>
-                            ) : (
-                                <span>Convert Now</span>
-                            )}
-                        </Button>
+                                )}
+                            </Button>
+                        </div>
                     )}
                 </div>
             </div>

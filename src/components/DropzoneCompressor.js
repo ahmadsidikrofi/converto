@@ -129,6 +129,11 @@ const DropzoneCompressor = () => {
             setActions(prevActions => prevActions.map(action => 
                 action.file_name === file.name ? { ...action, file: compressedFile, file_size: compressedFile.size, is_compressing: false, is_compressed: true } : action
             ))
+            toast({
+                title: "Berhasil diperkecil",
+                description: "Gambarmu sudah seukuran kelingking yeay.",
+                duration: 4000
+            })
             setIsDone(true)
         } catch (error) {
             console.error('Error during compression:', error)
@@ -177,6 +182,7 @@ const DropzoneCompressor = () => {
             }
         }
     }
+
 
     const load = async () => {
         const ffmpeg_response = await LoadFfmpeg()
