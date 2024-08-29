@@ -30,12 +30,17 @@ const MobileNavbar = () => {
                                     <Button variant='outline'><GitHubLogoIcon className="w-4 h-4" /></Button>
                                 </Link>
                             </div>
-                            <h2 className="text-xl font-bold text-[#e5322d]">Converto</h2>
+                            <Link href='/'>
+                                <h2 className="text-xl font-bold text-[#e5322d]">Converto</h2>
+                            </Link>
                         </SheetTitle>
                         <SheetDescription>
                             <div className="flex flex-col justify-center items-center">
                                 <Link href="/">
                                     <Button variant="ghost" className="text-md font-medium">Home</Button>
+                                </Link>
+                                <Link href="/background-remover">
+                                    <Button variant="ghost" className="text-md font-medium">Background Remover</Button>
                                 </Link>
                                 <Link href="/compress">
                                     <Button variant="ghost" className="text-sm lg:text-lg font-medium">Compressor</Button>

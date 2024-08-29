@@ -1,5 +1,5 @@
 'use client'
-import { FilePng, TrayArrowUp } from "@phosphor-icons/react"
+import { FilePng, SpinnerGap, TrayArrowUp } from "@phosphor-icons/react"
 import { useEffect, useRef, useState } from "react"
 import ReactDropzone from "react-dropzone"
 import LoadFfmpeg from "../../utils/load-ffmpeg"
@@ -22,7 +22,7 @@ const DropzoneRemoverBg = () => {
     const [isReady, setIsReady] = useState(false)
     const [isLoaded, setIsLoaded] = useState(false)
     const ffmpegRef = useRef(null)
-    const [buttonPosition, setButtonPosition] = useState('fixed')
+    const [isDownloading, setIsDownloading] = useState(false)
     const accepted_files = {
         "image/*": [
             ".jpg",
@@ -78,6 +78,8 @@ const DropzoneRemoverBg = () => {
     }
 
     const handleDownloadFile = () => {
+        setIsDownloading(true)
+        setTimeout(() => {setIsDownloading(false)}, 2000)
         if (actions.length > 1) {
             const zip = new JSZip()
             const promises = actions.map(async(action) => {
@@ -207,8 +209,10 @@ const DropzoneRemoverBg = () => {
             <div className="space-y-6">
                 {actions.filter((action) => action.file_type.includes('image')).map((action, i) => (
                     <div className="w-full py-4 space-y-2 lg:py-0 relative rounded-xl flex flex-col justify-center items-center" key={i}>
-                        <div className="mt-12">
-                            <Button disabled={action.is_removing ? true : false} onClick={() => handleRemoveBackground(action.file_name)} className="rounded-full p-3 bg-sky-500">Remove Background</Button>
+                        <div className="mt-12 z-10">
+                            {!action.is_removed ? (
+                                <Button disabled={action.is_removing ? true : false} onClick={() => handleRemoveBackground(action.file_name)} className="rounded-full p-3 bg-sky-500">Remove Background</Button>
+                            ) : null}
                         </div>
                         <div className="border p-2 rounded-lg mx-auto">
                             <Tabs defaultValue="before" className="w-[320px]">
@@ -256,7 +260,18 @@ const DropzoneRemoverBg = () => {
                 <div className={`lg:sticky bottom-1/2 right-0 lg:flex lg:justify-end lg:pr-10`}>
                     {isDone ? (
                         <div className="flex flex-col justify-center gap-3">
-                            <Button onClick={handleDownloadFile} className='bg-[#e5322d] hover:bg-red-500 p-5 max-sm:text-sm sm:text-sm text-lg'>{actions.length > 1 ? "Download all" : "Download file"}</Button>
+                            <Button onClick={handleDownloadFile} disabled={isDownloading} className='bg-[#e5322d] hover:bg-red-500 p-5 max-sm:text-sm sm:text-sm text-lg'>
+                                {isDownloading ? (
+                                    <div className="flex gap-2">
+                                        <span className="animate-spin text-lg">
+                                            <SpinnerGap className="animate-spin" />
+                                        </span>
+                                        <span>Downloading...</span>
+                                    </div>
+                                ) : (
+                                    <span>{actions.length > 1 ? "Download all" : "Download file"}</span>
+                                )}
+                            </Button>
                             <Button onClick={resetFile} variant='outline' className='p-5 max-sm:text-sm sm:text-sm text-lg'>Remove another Background</Button>
                         </div>
                     ) : null }
