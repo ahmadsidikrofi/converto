@@ -1,5 +1,5 @@
 'use client'
-import { BoxIcon, CheckCircledIcon, CircleIcon, FileIcon, TrashIcon } from "@radix-ui/react-icons"
+import { CheckCircledIcon, TrashIcon } from "@radix-ui/react-icons"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -17,9 +17,7 @@ import ByteToSize from "../../utils/byte-to-size";
 import LoadFfmpeg from "../../utils/load-ffmpeg"
 import CompressFileName from "../../utils/compress-file-name"
 import ConvertFile from "../../utils/convertFile"
-import { FFmpeg } from "@ffmpeg/ffmpeg"
 import { useEffect, useRef, useState } from "react"
-import { Action } from "../../types.d"
 import IconFile from "../../utils/icon-file"
 import { BoxArrowUp, FileIni, SpinnerGap, Warning } from "@phosphor-icons/react"
 const extensions = {

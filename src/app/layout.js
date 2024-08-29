@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
       <link rel="icon" type="image/png" sizes="16x16" href="/Converto-logo.png"></link>
       <body className={inter.className}>
         <ThemeProvider
-          atrribute="class"
+          attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange

@@ -10,9 +10,11 @@ import {
 import { GitHubLogoIcon, HamburgerMenuIcon } from "@radix-ui/react-icons"
 import Link from "next/link"
 import { Button } from "./ui/button"
-import { MoonStars } from "@phosphor-icons/react"
+import { MoonStars, SunHorizon } from "@phosphor-icons/react"
+import { useTheme } from "next-themes"
 
 const MobileNavbar = () => {
+    const { theme, setTheme } = useTheme()
     return (
         <nav>
             <Sheet>
@@ -21,7 +23,9 @@ const MobileNavbar = () => {
                     <SheetHeader>
                         <SheetTitle className="mt-10 text-center">
                             <div className="flex gap-2 justify-center mb-5">
-                                <Button variant='outline'><MoonStars className="w-4 h-4" /></Button>
+                                <Button onClick={() => setTheme(theme === 'light' ?  'dark' : 'light')} variant='outline'>
+                                    {theme === 'light' ? <MoonStars className="w-4 h-4" /> : <SunHorizon className="w-4 h-4" />}
+                                </Button>
                                 <Link target="_blank" href="https://github.com/ahmadsidikrofi/converto">
                                     <Button variant='outline'><GitHubLogoIcon className="w-4 h-4" /></Button>
                                 </Link>

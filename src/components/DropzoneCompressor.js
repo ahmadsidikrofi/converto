@@ -1,5 +1,5 @@
 'use client'
-import { FileIcon, TrashIcon, UploadIcon } from "@radix-ui/react-icons"
+import { TrashIcon } from "@radix-ui/react-icons"
 import ReactDropzone from "react-dropzone"
 import { toast, useToast } from "./ui/use-toast"
 import { useEffect, useRef, useState } from "react"
@@ -10,7 +10,7 @@ import LoadFfmpeg from "../../utils/load-ffmpeg"
 import { Button } from "./ui/button"
 import imageCompression from 'browser-image-compression'
 import { Skeleton } from "./ui/skeleton"
-import { FilePng, TrayArrowUp } from "@phosphor-icons/react"
+import { FilePng, SpinnerGap, TrayArrowUp } from "@phosphor-icons/react"
 import JSZip from "jszip"
 
 const extensions = {
@@ -53,14 +53,12 @@ const DropzoneCompressor = () => {
     const { toast } = useToast()
     const [isHover, setIsHover] = useState(false)
     const [actions, setActions] = useState([])
+    const [isDone, setIsDone] = useState(false)
     const [isReady, setIsReady] = useState(false)
     const [files, setFiles] = useState([])
     const [isLoaded, setIsLoaded] = useState(false)
-    const [isCompressing, setIsCompressing] = useState(false)
-    const [isDone, setIsDone] = useState(false)
+    const [isDownloading, setIsDownloading] = useState(false)
     const ffmpegRef = useRef(null)
-    const [defaultValues, setDefaultValues] = useState("video")
-    const [selected, setSelected] = useState('...')
     const accepted_files = {
         "image/*": [
             ".jpg",
@@ -155,11 +153,13 @@ const DropzoneCompressor = () => {
     }
     
     const handleDownloadFile = () => {
+        setIsDownloading(true)
+        setTimeout(() => {setIsDownloading(false)}, 3000)
         if (actions.length > 1) {
             const zip = new JSZip()
             actions.forEach((action) => {
                 if (action.is_compressed && action.file) {
-                    zip.file(action.file_name, action.file)                    
+                    zip.file(action.file_name, action.file)
                 }
             })
             zip.generateAsync({ type: 'blob' }).then((content) => {
@@ -198,11 +198,10 @@ const DropzoneCompressor = () => {
             setIsDone(false)
             setFiles([])
             setIsReady(false)
-            setIsCompressing(false)
         } else {
             checkIsReady()
         }
-    }, [actions, setIsCompressing])
+    }, [actions])
     useEffect(() => {
         load()
     }, [])
@@ -243,7 +242,18 @@ const DropzoneCompressor = () => {
                             </span>
                         </div>
                         <div className="flex items-center gap-1 w-96 max-sm:px-8 max-sm:justify-between">
-                            <Button disabled={action.is_compressing ? true : false} onClick={() => handleCompressImage(action.file)} variant='outline'>Compress now</Button>
+                            <Button disabled={action.is_compressing} onClick={() => handleCompressImage(action.file)} variant='outline'>
+                            {action.is_compressing ? (
+                                <div className="flex gap-2 items-center">
+                                    <span className="animate-spin text-lg">
+                                        <SpinnerGap className="animate-spin" />
+                                    </span>
+                                    <span>Compressing...</span>
+                                </div>
+                            ) : (
+                                <span>Compress now</span>
+                            )}
+                            </Button>
                             <Button onClick={() => handleRemoveFile(action.file_name)} variant='ghost' className='p-3 max-sm:block hidden'>
                                 <TrashIcon className="w-6 h-6" />
                             </Button>
@@ -258,7 +268,18 @@ const DropzoneCompressor = () => {
                 <div className="flex justify-end">
                     {isDone ? (
                         <div className="flex flex-col justify-center gap-3">
-                            <Button onClick={handleDownloadFile} className='bg-[#e5322d] hover:bg-red-500 p-5'>{actions.length > 1 ? "Download all" : "Download file"}</Button>
+                            <Button onClick={handleDownloadFile} disabled={isDownloading} className='bg-[#e5322d] hover:bg-red-500 p-5'>
+                                {isDownloading ? (
+                                    <div className="flex gap-2">
+                                        <span className="animate-spin text-lg">
+                                            <SpinnerGap className="animate-spin" />
+                                        </span>
+                                        <span>Downloading...</span>
+                                    </div>
+                                ) : (
+                                    <span>{actions.length > 1 ? "Download all" : "Download file"}</span>
+                                )}
+                            </Button>
                             <Button onClick={resetFile} variant='outline' className='p-5'>Compress another file(s)</Button>
                         </div>
                     ) : null }
