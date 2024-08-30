@@ -39,11 +39,14 @@ const MobileNavbar = () => {
                                 <Link href="/">
                                     <Button variant="ghost" className="text-md font-medium">Home</Button>
                                 </Link>
+                                <Link href="/image-to-pdf">
+                                    <Button variant="ghost" className="text-md font-medium">Image To PDF</Button>
+                                </Link>
                                 <Link href="/background-remover">
                                     <Button variant="ghost" className="text-md font-medium">Background Remover</Button>
                                 </Link>
                                 <Link href="/compress">
-                                    <Button variant="ghost" className="text-sm lg:text-lg font-medium">Compressor</Button>
+                                    <Button variant="ghost" className="text-sm lg:text-lg font-medium">Image Reducer</Button>
                                 </Link>
                                 <Link href="/about">
                                     <Button variant="ghost" className="text-md font-medium">About</Button>

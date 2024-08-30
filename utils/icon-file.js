@@ -1,5 +1,5 @@
 'use client'
-import { FileCloud, FileVideo, Images, MusicNotes } from "@phosphor-icons/react";
+import { FileCloud, FilePdf, FileVideo, Images, MusicNotes } from "@phosphor-icons/react";
 // import { VideoIcon, SpeakerLoudIcon, ImageIcon, FileIcon } from "@radix-ui/react-icons";
 
 export default function IconFile(file_type) {

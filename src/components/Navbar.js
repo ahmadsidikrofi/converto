@@ -6,6 +6,7 @@ import Link from "next/link"
 import MobileNavbar from "./MobileNavbar"
 import Image from "next/image"
 import { useTheme } from "next-themes"
+import NavMenuTab from "./NavigationMenu"
 
 const Navbar = () => {
     const { theme, setTheme } = useTheme()
@@ -16,12 +17,7 @@ const Navbar = () => {
                 <h2 className="text-3xl font-bold text-[#e5322d]">Converto</h2>
             </Link>
             <div className="hidden lg:flex gap-3">
-                <Link href="/background-remover">
-                    <Button variant="ghost" className="lg:text-lg font-medium">Remover</Button>
-                </Link>
-                <Link href="/compress">
-                    <Button variant="ghost" className="lg:text-lg font-medium">Compressor</Button>
-                </Link>
+                <NavMenuTab />
                 <Link href="/about">
                     <Button variant="ghost" className="lg:text-lg font-medium">About</Button>
                 </Link>

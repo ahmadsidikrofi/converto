@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react"
 import ReactDropzone from "react-dropzone"
 import LoadFfmpeg from "../../utils/load-ffmpeg"
 import { useToast } from "./ui/use-toast"
-import { Skeleton } from "./ui/skeleton"
 import CompressFileName from "../../utils/compress-file-name"
 import ByteToSize from "../../utils/byte-to-size"
 import { Button } from "./ui/button"
@@ -215,7 +214,7 @@ const DropzoneRemoverBg = () => {
                             ) : null}
                         </div>
                         <div className="border p-2 rounded-lg mx-auto">
-                            <Tabs defaultValue="before" className="w-[320px]">
+                            <Tabs defaultValue={action.is_removing === true ? 'after' : 'before'} className="w-[320px]">
                                 <TabsList className="grid w-full grid-cols-2">
                                     <TabsTrigger value="before">Before</TabsTrigger>
                                     <TabsTrigger value="after" disabled={!action.is_removing && !action.is_removed}>After</TabsTrigger>
