@@ -67,3 +67,15 @@
     @apply bg-background text-foreground;
   }
 }
+
+.card-container {
+  perspective: 1500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease;
+}

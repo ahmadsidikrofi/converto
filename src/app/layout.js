@@ -23,12 +23,13 @@ export default function RootLayout({ children }) {
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
+          themes={['light', 'dark']}
         >
           <Navbar />
+          <Toaster />
           <main>
             {children}
           </main>
-          <Toaster />
         </ThemeProvider>
       </body>
     </html>

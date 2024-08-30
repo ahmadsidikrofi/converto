@@ -290,16 +290,16 @@ const DropzoneRemoverBg = () => {
                 handleExitHover()
                 toast({
                     variant: 'destructive',
-                    title: 'Error when upload file(s)',
-                    description: 'Only image allowed',
+                    title: 'Terjadi error saat mengunggah gambar',
+                    description: 'Cuma gambar yang boleh kemari🙏',
                     duration: 4000,
                 })
             }}
             onError={() => {
                 toast({
                     variant: 'destructive',
-                    title: 'Error when upload file(s)',
-                    description: 'Only image allowed',
+                    title: 'Terjadi error saat mengunggah gambar',
+                    description: 'Cuma gambar yang boleh kemari🙏',
                     duration: 4000,
                 })
             }}

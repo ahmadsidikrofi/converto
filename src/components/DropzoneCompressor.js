@@ -12,7 +12,6 @@ import imageCompression from 'browser-image-compression'
 import { Skeleton } from "./ui/skeleton"
 import { FilePng, SpinnerGap, TrayArrowUp } from "@phosphor-icons/react"
 import JSZip from "jszip"
-
 const extensions = {
     image: [
       "jpg",
@@ -297,16 +296,16 @@ const DropzoneCompressor = () => {
                 handleExitHover()
                 toast({
                     variant: 'destructive',
-                    title: 'Error when upload file(s)',
-                    description: 'Only image allowed',
+                    title: 'Terjadi error saat mengunggah gambar',
+                    description: 'Cuma gambar yang boleh kemari🙏',
                     duration: 4000,
                 })
             }}
             onError={() => {
                 toast({
                     variant: 'destructive',
-                    title: 'Error when upload file(s)',
-                    description: 'Only image allowed',
+                    title: 'Terjadi error saat mengunggah gambar',
+                    description: 'Cuma gambar yang boleh kemari🙏',
                     duration: 4000,
                 })
             }}
