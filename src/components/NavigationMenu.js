@@ -33,20 +33,26 @@ const NavMenuTab = () => {
                                             Converto Files
                                         </div>
                                         <p className="text-sm leading-tight text-muted-foreground">
-                                            Beautifully designed components built with Radix UI and
-                                            Tailwind CSS.
+                                            Buka potensi kreativitasmu dengan Converto – 
+                                            platform online andalan buat konversi multimedia. 
                                         </p>
                                     </a>
                                 </NavigationMenuLink>
                             </li>
                             <ListItem href="/background-remover" title="Background Remover">
-                                Re-usable components built using Radix UI and Tailwind CSS.
+                                Buat gambar lebih bersih dan fokus dengan Converto! 
+                                Hilangkan background dengan sekali klik dan bikin hasilnya jadi lebih pro. 
+                                Gampang, cepat, dan hasilnya bikin puas!
                             </ListItem>
                             <ListItem href="/compress" title="Image Reducer">
-                                Styles for headings, paragraphs, lists...etc
+                                Gak perlu khawatir soal ukuran file lagi! Dengan Converto, 
+                                kamu bisa kompres gambar jadi lebih kecil tanpa mengorbankan kualitas.
+                                Simpan space, stay sharp, dan siap untuk dipamerkan ke mana saja! Compress now and Tadaa🤩
                             </ListItem>
                             <ListItem href="/image-to-pdf" title="Image To PDF">
-                                Styles for headings, paragraphs, lists...etc
+                                Dari foto ke PDF? Semuanya bisa dalam sekejap dengan Converto!
+                                Ubah gambar jadi dokumen keren, gampang banget, dan langsung siap share. 
+                                Keep it simple, keep it classy, convert sekarang, dan langsung unduh!🔥
                             </ListItem>
                         </ul>
                     </NavigationMenuContent>

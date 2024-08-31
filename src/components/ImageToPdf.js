@@ -126,14 +126,16 @@ const ImageToPdf = () => {
                 is_converted: true,
                 pdf,
             })))
-            setIsDone(true)
-            setIsConverting(false)
-            setIsLoaded(false)
-            toast({
-                title: "Conversion Successfull",
-                description: "Seluruh gambarmu sukses menjadi PDF 🗃️.",
-                duration: 3000
-            })
+            setTimeout(() => {
+                setIsDone(true)
+                setIsConverting(false)
+                setIsLoaded(false)
+                toast({
+                    title: "Conversion Successfull",
+                    description: "Seluruh gambarmu sukses menjadi PDF 🗃️.",
+                    duration: 3000
+                })
+            }, 2000)
         } catch (err) {
             console.error("Error while convert to pdf", err)
             setActions((prevActions) => prevActions.map((action) => ({
@@ -146,12 +148,12 @@ const ImageToPdf = () => {
                 description: "Gambarmu tidak mau jadi PDF.",
                 duration: 3000
             })
-        } finally {
-            setIsConverting(false)
         }
     }
 
     const handleDownloadAll = async () => {
+        setIsDownloading(true)
+        setTimeout(() => {setIsDownloading(false)}, 1000)
         const pdf = new jsPDF({
             format: 'a4'
         })
@@ -243,7 +245,7 @@ const ImageToPdf = () => {
                                 <span>Done</span>
                                 <CheckCircle />
                             </Badge>
-                        ) : action.is_converting ? (
+                        ) : isConverting ? (
                             <Badge className="flex gap-2 items-center p-1 lg:mx-20 max-sm:mx-8">
                                 <span>Converting</span>
                                 <SpinnerGap className="animate-spin" />
@@ -280,7 +282,18 @@ const ImageToPdf = () => {
                 <div className="flex justify-end">
                     {isDone ? (
                         <div className="flex flex-col justify-center gap-3 max-sm:mx-8">
-                            <Button onClick={handleDownloadAll} className='bg-[#e5322d] hover:bg-red-500 p-5'>{actions.length > 1 ? "Download all" : "Download file"}</Button>
+                            <Button onClick={handleDownloadAll} className='bg-[#e5322d] hover:bg-red-500 p-5'>
+                                {isDownloading ? (
+                                    <div className="flex gap-1">
+                                        <span className="animate-spin text-lg">
+                                            <SpinnerGap className="animate-spin" />
+                                        </span>
+                                        <span>Downloading...</span>
+                                    </div>
+                                ) : (
+                                    <span>Download PDF</span>
+                                )}
+                            </Button>
                             <Button onClick={resetFile} variant='outline' className='p-5'>Convert another file(s)</Button>
                         </div>
                     ) : (

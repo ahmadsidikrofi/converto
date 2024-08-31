@@ -20,6 +20,7 @@ const DropzoneRemoverBg = () => {
     const [files, setFiles] = useState([])
     const [isReady, setIsReady] = useState(false)
     const [isLoaded, setIsLoaded] = useState(false)
+    // const [activeTab, setActiveTab] = useState('before')
     const ffmpegRef = useRef(null)
     const [isDownloading, setIsDownloading] = useState(false)
     const accepted_files = {
@@ -59,7 +60,8 @@ const DropzoneRemoverBg = () => {
                 is_removed: false,
                 is_removing: false,
                 is_error: false,
-                selectedFormat: null
+                selectedFormat: null,
+                activeTab: 'before',
             })
             setActions(tmp)
         })
@@ -74,6 +76,7 @@ const DropzoneRemoverBg = () => {
         setActions([])
         setFiles([])
         setIsReady(false)
+        // setActiveTab('before')
     }
 
     const handleDownloadFile = () => {
@@ -121,7 +124,6 @@ const DropzoneRemoverBg = () => {
             return action
         })
         setActions(updateActions)
-
         try {
             const formData = new FormData()
             formData.append('size', 'auto')
@@ -139,7 +141,7 @@ const DropzoneRemoverBg = () => {
 
                 const updateActions = actions.map((action) => {
                     if (action.file_name === file_name) {
-                        return { ...action, is_removing: false, is_removed: true, remove_bg_url: removedBgUrl }
+                        return { ...action, is_removing: false, is_removed: true, remove_bg_url: removedBgUrl, activeTab: 'after' }
                     }
                     return action
                 })
@@ -149,6 +151,7 @@ const DropzoneRemoverBg = () => {
                     description: "Backgroundmu sudah dihilangkan entah kemana.",
                     duration: 4000
                 })
+                // setActiveTab('after')
                 setIsDone(true)
                 console.log('Background berhasil dihapus')
             } else {
@@ -157,7 +160,7 @@ const DropzoneRemoverBg = () => {
         } catch {
             const updatedActions = actions.map((action) => {
                 if (action.file_name === file_name) {
-                    return { ...action, is_error: true, is_removing: false }
+                    return { ...action, is_error: true, is_removing: false, activeTab: 'before' }
                 }
                 return action
             })
@@ -194,6 +197,7 @@ const DropzoneRemoverBg = () => {
             setIsDone(false)
             setFiles([])
             setIsReady(false)
+            // setActiveTab('before')
         } else {
             checkIsReady()
         }
@@ -213,14 +217,20 @@ const DropzoneRemoverBg = () => {
                                 <Button disabled={action.is_removing ? true : false} onClick={() => handleRemoveBackground(action.file_name)} className="rounded-full p-3 bg-sky-500">Remove Background</Button>
                             ) : null}
                         </div>
-                        <div className="border p-2 rounded-lg mx-auto">
-                            <Tabs defaultValue={action.is_removing === true ? 'after' : 'before'} className="w-[320px]">
+                        <div className="border p-2 rounded-lg mx-auto z-10">
+                            <Tabs value={action.activeTab} className="w-[320px] ">
                                 <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="before">Before</TabsTrigger>
-                                    <TabsTrigger value="after" disabled={!action.is_removing && !action.is_removed}>After</TabsTrigger>
+                                    <TabsTrigger value="before" onClick={() => {
+                                        const updateTab = actions.map((actionTab) => actionTab.file_name === action.file_name ? {...actionTab, activeTab: 'before'} : actionTab)
+                                        setActions(updateTab)
+                                    }}>Before</TabsTrigger>
+                                    <TabsTrigger value="after" disabled={!action.is_removed} onClick={() => {
+                                        const updateTab = actions.map((actionTab) => actionTab.file_name === action.file_name ? {...actionTab, activeTab: 'after'} : actionTab)
+                                        setActions(updateTab)
+                                    }}>After</TabsTrigger>
                                 </TabsList>
                                 <TabsContent value="before" className="flex flex-col items-center justify-center gap-3">
-                                    <Image src={action.file_url} width={728} height={728} alt="..." className="w-80 h-full object-cover rounded-lg" />
+                                    <Image src={action.file_url} width={728} height={728} alt={action.file_name} className="w-80 h-full object-cover rounded-lg" />
                                     <Button onClick={() => handleRemoveFile(action.file_name)} variant='outline' className='p-2 mt-1 bg-sky-100 dark:bg-sky-700'>
                                         <TrashIcon className="w-6 h-6" />
                                     </Button>

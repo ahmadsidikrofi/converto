@@ -122,7 +122,6 @@ const DropzoneCompressor = () => {
             ))
             const compressedFile = await imageCompression(file, options)
             console.log('Compressed file:', compressedFile)
-            // Update actions with the compressed file
             setActions(prevActions => prevActions.map(action => 
                 action.file_name === file.name ? { ...action, file: compressedFile, file_size: compressedFile.size, is_compressing: false, is_compressed: true } : action
             ))
