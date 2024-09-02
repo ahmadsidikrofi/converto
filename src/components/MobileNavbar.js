@@ -48,6 +48,9 @@ const MobileNavbar = () => {
                                 <Link href="/compress">
                                     <Button variant="ghost" className="text-sm lg:text-lg font-medium">Image Reducer</Button>
                                 </Link>
+                                <Link href="/image-generator">
+                                    <Button variant="ghost" className="text-sm lg:text-lg font-medium">AI Image Generator</Button>
+                                </Link>
                                 <Link href="/about">
                                     <Button variant="ghost" className="text-md font-medium">About</Button>
                                 </Link>

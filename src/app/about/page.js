@@ -25,7 +25,10 @@ const AboutPage = () => {
                 <div className="bg-white dark:bg-slate-900 shadow-lg rounded-lg p-8">
                     <div className="flex gap-1">
                         <HandHeart weight="fill" className="h-10 w-10 text-red-600"/>
-                        <h3 className="text-gray-700 dark:text-white text-2xl font-bold mb-6">Yuk, kenalan dengan Converto </h3>
+                        <div className="text-gray-700 dark:text-white text-2xl font-bold mb-6 flex items-center gap-2">
+                            <h3>Yuk, kenalan dengan Converto</h3>
+                            <span className="text-sm text-muted-foreground">yang telah ditenagai oleh Rofi</span>
+                        </div>
                     </div>
                     <p className="text-muted-foreground max-sm:text-sm text-sm md:text-lg">
                         Alat konversi multimedia paling top yang bikin kamu bebas ngubah gambar, file audio, dan video 

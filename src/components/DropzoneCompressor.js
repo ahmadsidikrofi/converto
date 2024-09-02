@@ -109,13 +109,42 @@ const DropzoneCompressor = () => {
         setIsReady(tmpReady)
     }
 
+    // const handleCompressImage = async (file) => {
+    //     const options = {
+    //         maxSizeMB: 1,
+    //         maxWidthOrHeight: 1920,
+    //         useWebWorker: true,
+    //     }
+    
+    //     try {
+    //         setActions(prevActions => prevActions.map(action => 
+    //             action.file_name === file.name ? { ...action, is_compressing: true } : action
+    //         ))
+    //         const compressedFile = await imageCompression(file, options)
+    //         console.log('Compressed file:', compressedFile)
+    //         setActions(prevActions => prevActions.map(action => 
+    //             action.file_name === file.name ? { ...action, file: compressedFile, file_size: compressedFile.size, is_compressing: false, is_compressed: true } : action
+    //         ))
+    //         toast({
+    //             title: "Berhasil diperkecil",
+    //             description: "Gambarmu sudah seukuran kelingking yeay.",
+    //             duration: 4000
+    //         })
+    //         setIsDone(true)
+    //     } catch (error) {
+    //         console.error('Error during compression:', error)
+    //         setActions(prevActions => prevActions.map(action =>
+    //             action.file_name === file.name ? { ...action, is_compressing: false, is_error: true } : action
+    //         ))
+    //     }
+    // }
+
     const handleCompressImage = async (file) => {
         const options = {
             maxSizeMB: 1,
             maxWidthOrHeight: 1920,
             useWebWorker: true,
         }
-    
         try {
             setActions(prevActions => prevActions.map(action => 
                 action.file_name === file.name ? { ...action, is_compressing: true } : action

@@ -291,7 +291,7 @@ const ImageToPdf = () => {
                                         <span>Downloading...</span>
                                     </div>
                                 ) : (
-                                    <span>Download PDF</span>
+                                    <span>Download All PDF</span>
                                 )}
                             </Button>
                             <Button onClick={resetFile} variant='outline' className='p-5'>Convert another file(s)</Button>

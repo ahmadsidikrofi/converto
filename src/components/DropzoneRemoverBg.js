@@ -48,7 +48,6 @@ const DropzoneRemoverBg = () => {
         setFiles(data)
         const tmp = []
         data.forEach((file) => {
-            // const formData = new FormData()
             tmp.push({
                 file_name: file.name,
                 file_size: file.size,

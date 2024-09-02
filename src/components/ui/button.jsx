@@ -11,7 +11,7 @@ const buttonVariants = cva(
       variant: {
         // default:
         //   "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-        default: 'before:ease relative overflow-hidden bg-primary-600 text-white transition-all before:absolute before:right-0 before:top-0 before:h-12 before:w-6 before:-translate-x-60 before:rotate-6 before:bg-white before:opacity-10 before:duration-1000 hover:before:translate-x-36 duration-700',
+        default: 'before:ease relative overflow-hidden bg-primary-600 text-white transition-all before:absolute before:right-0 before:top-0 before:h-12 before:w-6 before:-translate-x-52 before:rotate-6 before:bg-white before:opacity-10 before:duration-1000 hover:before:translate-x-36 duration-700',
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:
