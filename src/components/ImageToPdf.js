@@ -47,8 +47,9 @@ const ImageToPdf = () => {
     
     const handleUpload = (data) => {
         handleExitHover()
-        setFiles(data)
-        const tmp = []
+        setFiles((prevFiles) => [...prevFiles, ...data])
+        const tmp = [...actions]
+
         data.forEach((file) => {
             const image = new Image()
             const objectUrl = URL.createObjectURL(file)
@@ -297,7 +298,7 @@ const ImageToPdf = () => {
                             <Button onClick={resetFile} variant='outline' className='p-5'>Convert another file(s)</Button>
                         </div>
                     ) : (
-                        <div className="max-sm:px-8">
+                        <div className="max-sm:px-8 flex gap-2">
                             <Button disabled={isConverting || !isReady} onClick={handleConvertToPDF} className='bg-[#e5322d] hover:bg-red-500 hover:rounded-xl p-5 text-md max-sm:text-sm transition-all ease-in-out'>
                                 {isConverting ? (
                                     <div className="flex gap-2 items-center">
@@ -313,6 +314,38 @@ const ImageToPdf = () => {
                                     <span>Convert to PDF</span>
                                 )}
                             </Button>
+                            <ReactDropzone
+                                onDragEnter={handleHover}
+                                onDragLeave={handleExitHover}
+                                onDrop={handleUpload}
+                                accept={accepted_files}
+                                onDropRejected={() => {
+                                    handleExitHover()
+                                    toast({
+                                        variant: 'destructive',
+                                        title: 'Terjadi error saat mengunggah gambar',
+                                        description: 'Cuma gambar yang boleh kemari🙏',
+                                        duration: 4000,
+                                    })
+                                }}
+                                onError={() => {
+                                    toast({
+                                        variant: 'destructive',
+                                        title: 'Terjadi error saat mengunggah gambar',
+                                        description: 'Cuma gambar yang boleh kemari🙏',
+                                        duration: 4000,
+                                    })
+                                }}
+                            >
+                                {({ getRootProps, getInputProps }) => (
+                                    <div {...getRootProps()}>
+                                        <input {...getInputProps()} />
+                                        <div>
+                                            <Button className="bg-emerald-600 p-5 text-md max-sm:text-sm">Add file</Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </ReactDropzone> 
                         </div>
                     )}
                 </div>
@@ -322,54 +355,54 @@ const ImageToPdf = () => {
 
     return ( 
         <ReactDropzone
-        onDragEnter={handleHover}
-        onDragLeave={handleExitHover}
-        onDrop={handleUpload}
-        accept={accepted_files}
-        onDropRejected={() => {
-            handleExitHover()
-            toast({
-                variant: 'destructive',
-                title: 'Terjadi error saat mengunggah gambar',
-                description: 'Cuma gambar yang boleh kemari🙏',
-                duration: 4000,
-            })
-        }}
-        onError={() => {
-            toast({
-                variant: 'destructive',
-                title: 'Terjadi error saat mengunggah gambar',
-                description: 'Cuma gambar yang boleh kemari🙏',
-                duration: 4000,
-            })
-        }}
-    >
-        {({ getRootProps, getInputProps }) => (
-            <div {...getRootProps()} className="border-dashed border-2 border-slate-300 p-5 h-44 rounded-3xl cursor-pointer">
-                <input {...getInputProps()} />
-                <div>
-                    {isHover ? (
-                        <>
-                            <div className="flex flex-col items-center justify-center gap-3 my-3">
-                                <FilePng className="w-14 h-14 text-[#e5322d]"/>
-                                <p className="md:text-xl sm:text-sm max-sm:text-sm font-semibold">Drop it here 🤩</p>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <div className="flex flex-col items-center justify-center gap-3 my-3">
-                                <TrayArrowUp weight="duotone" className="w-14 h-14 text-[#e5322d]" />
-                                <div className="flex flex-col">
-                                    <p className="md:text-xl sm:text-sm max-sm:text-sm font-semibold">Select your file(s)</p>
-                                    <p className="text-sm text-muted-foreground">or just drop here</p>
+            onDragEnter={handleHover}
+            onDragLeave={handleExitHover}
+            onDrop={handleUpload}
+            accept={accepted_files}
+            onDropRejected={() => {
+                handleExitHover()
+                toast({
+                    variant: 'destructive',
+                    title: 'Terjadi error saat mengunggah gambar',
+                    description: 'Cuma gambar yang boleh kemari🙏',
+                    duration: 4000,
+                })
+            }}
+            onError={() => {
+                toast({
+                    variant: 'destructive',
+                    title: 'Terjadi error saat mengunggah gambar',
+                    description: 'Cuma gambar yang boleh kemari🙏',
+                    duration: 4000,
+                })
+            }}
+        >
+            {({ getRootProps, getInputProps }) => (
+                <div {...getRootProps()} className="border-dashed border-2 border-slate-300 p-5 h-44 rounded-3xl cursor-pointer">
+                    <input {...getInputProps()} />
+                    <div>
+                        {isHover ? (
+                            <>
+                                <div className="flex flex-col items-center justify-center gap-3 my-3">
+                                    <FilePng className="w-14 h-14 text-[#e5322d]" />
+                                    <p className="md:text-xl sm:text-sm max-sm:text-sm font-semibold">Drop it here 🤩</p>
                                 </div>
-                            </div>
-                        </>
-                    )}
+                            </>
+                        ) : (
+                            <>
+                                <div className="flex flex-col items-center justify-center gap-3 my-3">
+                                    <TrayArrowUp weight="duotone" className="w-14 h-14 text-[#e5322d]" />
+                                    <div className="flex flex-col">
+                                        <p className="md:text-xl sm:text-sm max-sm:text-sm font-semibold">Select your file(s)</p>
+                                        <p className="text-sm text-muted-foreground">or just drop here</p>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </div>
-            </div>
-        )}
-    </ReactDropzone>
+            )}
+        </ReactDropzone>
     );
 }
  
