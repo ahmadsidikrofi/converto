@@ -181,33 +181,35 @@ const DropzoneCompressor = () => {
     
     const handleDownloadFile = () => {
         setIsDownloading(true)
-        setTimeout(() => {setIsDownloading(false)}, 3000)
-        if (actions.length > 1) {
-            const zip = new JSZip()
-            actions.forEach((action) => {
+        setTimeout(() => {
+            setIsDownloading(false)
+            if (actions.length > 1) {
+                const zip = new JSZip()
+                actions.forEach((action) => {
+                    if (action.is_compressed && action.file) {
+                        zip.file(action.file_name, action.file)
+                    }
+                })
+                zip.generateAsync({ type: 'blob' }).then((content) => {
+                    const link = document.createElement('a')
+                    link.href = URL.createObjectURL(content)
+                    link.download = 'compressed_file.zip'
+                    document.body.appendChild(link)
+                    link.click()
+                    document.body.removeChild(link)
+                })
+            } else {
+                const action = actions[0]
                 if (action.is_compressed && action.file) {
-                    zip.file(action.file_name, action.file)
+                    const link = document.createElement('a')
+                    link.href = URL.createObjectURL(action.file)
+                    link.download = action.file_name
+                    document.body.appendChild(link)
+                    link.click()
+                    document.body.removeChild(link)
                 }
-            })
-            zip.generateAsync({ type: 'blob' }).then((content) => {
-                const link = document.createElement('a')
-                link.href = URL.createObjectURL(content)
-                link.download = 'compressed_file.zip'
-                document.body.appendChild(link)
-                link.click()
-                document.body.removeChild(link)
-            })
-        } else {
-            const action = actions[0]
-            if (action.is_compressed && action.file) {
-                const link = document.createElement('a')
-                link.href = URL.createObjectURL(action.file)
-                link.download = action.file_name
-                document.body.appendChild(link)
-                link.click()
-                document.body.removeChild(link)
             }
-        }
+        }, 2000)
     }
 
 

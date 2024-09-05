@@ -66,8 +66,8 @@ const NavMenuTab = () => {
                                     Keep it simple, keep it classy, convert sekarang, dan langsung unduh!🔥
                                 </ListItem>
                             </Link>
-                            <Link href="/image-generator">
-                                <ListItem title="AI Image Generator">
+                            <Link href="/signature-drawer">
+                                <ListItem title="Signature Drawer">
                                     Dari foto ke PDF? Semuanya bisa dalam sekejap dengan Converto!
                                     Ubah gambar jadi dokumen keren, gampang banget, dan langsung siap share. 
                                     Keep it simple, keep it classy, convert sekarang, dan langsung unduh!🔥

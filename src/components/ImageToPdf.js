@@ -1,5 +1,5 @@
 'use client'
-import { CheckCircle, FilePng, SpinnerGap, TrayArrowUp, Warning, XCircle } from "@phosphor-icons/react"
+import { CheckCircle, FilePng, PlusCircle, SpinnerGap, TrayArrowUp, Warning, XCircle } from "@phosphor-icons/react"
 import ReactDropzone from "react-dropzone"
 import { useToast } from "./ui/use-toast"
 import { useEffect, useRef, useState } from "react"
@@ -341,7 +341,10 @@ const ImageToPdf = () => {
                                     <div {...getRootProps()}>
                                         <input {...getInputProps()} />
                                         <div>
-                                            <Button className="bg-emerald-600 p-5 text-md max-sm:text-sm">Add file</Button>
+                                            <Button disabled={isConverting} className="bg-emerald-600 p-5 text-md max-sm:text-sm flex gap-1">
+                                                <PlusCircle className="h-6 w-6" />
+                                                <span>Add file</span>
+                                            </Button>
                                         </div>
                                     </div>
                                 )}

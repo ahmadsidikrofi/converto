@@ -11,7 +11,7 @@ import NavMenuTab from "./NavigationMenu"
 const Navbar = () => {
     const { theme, setTheme } = useTheme()
     return (
-        <nav className={`flex items-center justify-between  max-sm:px-5 sm:px-5 md:px-16 py-9 shadow-[0_2px_4px_rgba(0,0,0,0.1)] transition-all duration-500 ease-linear `}>
+        <nav className={`flex items-center justify-between  max-sm:px-5 sm:px-5 md:px-16 py-7 shadow-[0_2px_4px_rgba(0,0,0,0.1)] transition-all duration-500 ease-linear `}>
             <Link href="/" className='flex items-center gap-2'>
                 <Image src="/Converto-logo.png" width={728} height={728} alt='Converto Logo' className='w-10' />
                 <h2 className="text-3xl font-bold text-[#e5322d]">Converto</h2>
