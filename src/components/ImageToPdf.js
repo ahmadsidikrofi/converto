@@ -91,7 +91,7 @@ const ImageToPdf = () => {
         }, 1000)
     }
 
-    const handleConvertToPDF = async () => {
+    const handleConvertToPDF = () => {
         if (!isReady) return
         setIsConverting(true)
 
@@ -105,32 +105,32 @@ const ImageToPdf = () => {
 
         const pdf = new jsPDF()
         try {
-            const convertedFiles =  await Promise.all(
-                convertingToPDFAction.map((action, i) => {
-                    return new Promise((resolve, reject) => {
-                        const img = new Image()
-                        img.src = action.file_url
-                        img.onload = () => {
-                            const imgWidth = pdf.internal.pageSize.getWidth()
-                            const imgHeight =  pdf.internal.pageSize.getHeight()
-                            if (i > 0) pdf.addPage()
-                            pdf.addImage(img, 'JPEG', 0, 0, imgWidth, imgHeight)
-                            resolve()
-                        }
-                        img.onerror = reject
-                    })
-                })
-            )
-            setActions((prevActions) => prevActions.map((action) => ({
-                ...action,
-                is_converting: false,
-                is_converted: true,
-                pdf,
-            })))
-            setTimeout(() => {
+            setTimeout(async() => {
                 setIsDone(true)
                 setIsConverting(false)
                 setIsLoaded(false)
+                const convertedFiles =  await Promise.all(
+                    convertingToPDFAction.map((action, i) => {
+                        return new Promise((resolve, reject) => {
+                            const img = new Image()
+                            img.src = action.file_url
+                            img.onload = () => {
+                                const imgWidth = pdf.internal.pageSize.getWidth()
+                                const imgHeight =  pdf.internal.pageSize.getHeight()
+                                if (i > 0) pdf.addPage()
+                                pdf.addImage(img, 'JPEG', 0, 0, imgWidth, imgHeight)
+                                resolve()
+                            }
+                            img.onerror = reject
+                        })
+                    })
+                )
+                setActions((prevActions) => prevActions.map((action) => ({
+                    ...action,
+                    is_converting: false,
+                    is_converted: true,
+                    pdf,
+                })))
                 toast({
                     title: "Conversion Successfull",
                     description: "Seluruh gambarmu sukses menjadi PDF 🗃️.",
@@ -152,25 +152,27 @@ const ImageToPdf = () => {
         }
     }
 
-    const handleDownloadAll = async () => {
+    const handleDownloadAll = () => {
         setIsDownloading(true)
-        setTimeout(() => {setIsDownloading(false)}, 1000)
-        const pdf = new jsPDF({
-            format: 'a4'
-        })
-        await Promise.all(actions.map(async(action, i) => {
-            const imgData = await new Promise((resolve, reject) => {
-                const img = new Image()
-                img.src = action.file_url
-                img.onload = () => resolve(img)
-                img.onerror = reject
+        setTimeout(async () => {
+            setIsDownloading(false)
+            const pdf = new jsPDF({
+                format: 'a4'
             })
-            if (i > 0) pdf.addPage()
-            const imgWidth = pdf.internal.pageSize.getWidth()
-            const imgHeight = (imgData.height * imgWidth) / imgData.width // Hitung tinggi berdasarkan lebar
-            pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight)
-        }))
-        pdf.save('Secara keseluruhan...pdf')
+            await Promise.all(actions.map(async(action, i) => {
+                const imgData = await new Promise((resolve, reject) => {
+                    const img = new Image()
+                    img.src = action.file_url
+                    img.onload = () => resolve(img)
+                    img.onerror = reject
+                })
+                if (i > 0) pdf.addPage()
+                const imgWidth = pdf.internal.pageSize.getWidth()
+                const imgHeight = (imgData.height * imgWidth) / imgData.width // Hitung tinggi berdasarkan lebar
+                pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight)
+            }))
+            pdf.save('Secara keseluruhan...pdf')
+        }, 2000)
     }
 
     const handleDownloadPerImage = (action) => {

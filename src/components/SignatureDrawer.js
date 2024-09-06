@@ -35,7 +35,7 @@ const SignatureDrawer = () => {
                         </div>
                     ))}
                 </div>
-                <SignatureCanvas penColor={selectedPenColor} clearOnResize={false} ref={(ref) => setSign(ref)} velocityFilterWeight={2} onEnd={handleEndDrawing}
+                <SignatureCanvas penColor={selectedPenColor} clearOnResize={false} ref={(ref) => setSign(ref)} onEnd={handleEndDrawing}
                     canvasProps={{ className: 'sigCanvas w-full h-full w-[450px] h-[250px] sm:w-[600px] sm:h-[230px] rounded-xl border shadow-lg mx-auto hover:border-red-500 transition-all ease-linear'}}
                 />
                 <div className="hidden sm:flex flex-col gap-3">

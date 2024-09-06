@@ -80,39 +80,41 @@ const DropzoneRemoverBg = () => {
 
     const handleDownloadFile = () => {
         setIsDownloading(true)
-        setTimeout(() => {setIsDownloading(false)}, 2000)
-        if (actions.length > 1) {
-            const zip = new JSZip()
-            const promises = actions.map(async(action) => {
-                if (action.is_removed && action.remove_bg_url) {
-                    return fetch(action.remove_bg_url)
-                    .then((res) => res.blob())
-                    .then((blob) => {
-                        zip.file(action.file_name, blob);
+        setTimeout(() => {
+            setIsDownloading(false)
+            if (actions.length > 1) {
+                const zip = new JSZip()
+                const promises = actions.map(async(action) => {
+                    if (action.is_removed && action.remove_bg_url) {
+                        return fetch(action.remove_bg_url)
+                        .then((res) => res.blob())
+                        .then((blob) => {
+                            zip.file(action.file_name, blob);
+                        });
+                    }
+                })
+                Promise.all(promises).then(() => {
+                    zip.generateAsync({ type: 'blob' }).then((content) => {
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(content);
+                        link.download = 'bg_removed_downloaded.zip';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
                     });
-                }
-            })
-            Promise.all(promises).then(() => {
-                zip.generateAsync({ type: 'blob' }).then((content) => {
+                });
+            } else if (actions.length === 1) {
+                const action = actions[0];
+                if (action.is_removed && action.remove_bg_url) {
                     const link = document.createElement('a');
-                    link.href = URL.createObjectURL(content);
-                    link.download = 'bg_removed_downloaded.zip';
+                    link.href = action.remove_bg_url;
+                    link.download = action.file_name;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
-                });
-            });
-        } else if (actions.length === 1) {
-            const action = actions[0];
-            if (action.is_removed && action.remove_bg_url) {
-                const link = document.createElement('a');
-                link.href = action.remove_bg_url;
-                link.download = action.file_name;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                }
             }
-        }
+        }, 2000)
     }
 
     const handleRemoveBackground = async (file_name) => {
@@ -213,7 +215,10 @@ const DropzoneRemoverBg = () => {
                     <div className="w-full py-4 space-y-2 lg:py-0 relative rounded-xl flex flex-col justify-center items-center" key={i}>
                         <div className="mt-12 z-10">
                             {!action.is_removed ? (
-                                <Button disabled={action.is_removing ? true : false} onClick={() => handleRemoveBackground(action.file_name)} className="rounded-full p-3 bg-sky-500">Remove Background</Button>
+                                <Button disabled={action.is_removing ? true : false} onClick={() => handleRemoveBackground(action.file_name)} className="rounded-full p-3 bg-sky-500 flex gap-2">
+                                    {action.is_removing ? <SpinnerGap className="animate-spin w-5 h-5" /> : null}
+                                    <span>Remove Background</span>
+                                </Button>
                             ) : null}
                         </div>
                         <div className="border p-2 rounded-lg mx-auto z-10">
