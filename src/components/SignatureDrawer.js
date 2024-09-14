@@ -23,7 +23,7 @@ const SignatureDrawer = () => {
     }
     return ( 
         <div>
-            <div className="flex max-sm:flex-col gap-3 w-[450px] h-[250px] sm:w-[600px] sm:h-[230px] mx-auto">
+            <div className="flex max-sm:flex-col gap-3 h-[250px] sm:w-[600px] sm:h-[230px] mx-auto">
                 <div className="hidden max-sm:flex gap-3 justify-center">
                     {colors.bgColors.map((bgColor, i) => (
                         <div key={i}>
@@ -36,7 +36,7 @@ const SignatureDrawer = () => {
                     ))}
                 </div>
                 <SignatureCanvas penColor={selectedPenColor} clearOnResize={false} ref={(ref) => setSign(ref)} onEnd={handleEndDrawing}
-                    canvasProps={{ className: 'sigCanvas w-full h-full w-[450px] h-[250px] sm:w-[600px] sm:h-[230px] rounded-xl border shadow-lg mx-auto hover:border-red-500 transition-all ease-linear'}}
+                    canvasProps={{ className: 'sigCanvas mx-auto w-[350px] h-[250px] sm:w-[600px] sm:h-[230px] rounded-xl border shadow-lg hover:border-red-500 transition-all ease-linear'}}
                 />
                 <div className="hidden sm:flex flex-col gap-3">
                     {colors.bgColors.map((bgColor, i) => (
