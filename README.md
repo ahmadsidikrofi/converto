@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/converto-logo.png" alt="Converto Logo" width="80" />
+  <img src="public/Converto-logo.png" alt="Converto Logo" width="80" />
   <h1>Converto</h1>
   <p><strong>Infinite Free File Converter — Convert images, audio, and video with no limits.</strong></p>
 
