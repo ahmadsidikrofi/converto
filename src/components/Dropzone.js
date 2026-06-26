@@ -31,7 +31,6 @@ const extensions = {
       "ico",
       "tif",
       "tiff",
-      "svg",
       "tga",
     ],
     video: [
@@ -215,8 +214,20 @@ const Dropzone = () => {
         setIsReady(false)
     }
 
+    const download = (action) => {
+        const a = document.createElement("a")
+        a.style.display = "none"
+        a.href = action.url
+        a.download = action.output
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+    }
+
     const handleDownloadFile = () => {
-        
+        actions.filter(action => action.is_converted).forEach(action => {
+            download(action)
+        })
     }
 
     useEffect(() => {
@@ -358,7 +369,7 @@ const Dropzone = () => {
                         )}
                         <div className="flex justify-end">
                             {action.is_converted ? (
-                                <Button variant='outline' className='p-3 max-sm:mx-8'>
+                                <Button onClick={() => download(action)} variant='outline' className='p-3 max-sm:mx-8'>
                                     <span>Download</span>
                                 </Button>
                             ) : (
