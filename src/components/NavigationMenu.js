@@ -33,44 +33,50 @@ const NavMenuTab = () => {
                                             Converto
                                         </div>
                                         <p className="text-sm leading-tight text-muted-foreground">
-                                            Buka potensi kreativitasmu dengan Converto – 
-                                            platform online andalan buat konversi multimedia. 
+                                            Buka potensi kreativitasmu dengan Converto –
+                                            platform online andalan buat konversi multimedia.
                                         </p>
                                     </Link>
                                 </NavigationMenuLink>
                             </li>
                             <Link href="/background-remover">
                                 <ListItem title="Background Remover">
-                                    Buat gambar lebih bersih dan fokus dengan Converto! 
-                                    Hilangkan background dengan sekali klik dan bikin hasilnya jadi lebih pro. 
+                                    Buat gambar lebih bersih dan fokus dengan Converto!
+                                    Hilangkan background dengan sekali klik dan bikin hasilnya jadi lebih pro.
                                     Gampang, cepat, dan hasilnya bikin puas!
                                 </ListItem>
                             </Link>
                             <Link href="/compress">
                                 <ListItem title="Image Reducer">
-                                    Gak perlu khawatir soal ukuran file lagi! Dengan Converto, 
+                                    Gak perlu khawatir soal ukuran file lagi! Dengan Converto,
                                     kamu bisa kompres gambar jadi lebih kecil tanpa mengorbankan kualitas.
                                     Simpan space, stay sharp, dan siap untuk dipamerkan ke mana saja! Compress now and Tadaa🤩
                                 </ListItem>
                             </Link>
                             <Link href="/">
                                 <ListItem title="Convert Files">
-                                    Buka potensi kreativitasmu dengan Converto – 
-                                    platform online andalan buat konversi multimedia. 
+                                    Buka potensi kreativitasmu dengan Converto –
+                                    platform online andalan buat konversi multimedia.
                                 </ListItem>
                             </Link>
                             <Link href="/image-to-pdf">
                                 <ListItem title="Image To PDF">
                                     Dari foto ke PDF? Semuanya bisa dalam sekejap dengan Converto!
-                                    Ubah gambar jadi dokumen keren, gampang banget, dan langsung siap share. 
+                                    Ubah gambar jadi dokumen keren, gampang banget, dan langsung siap share.
                                     Keep it simple, keep it classy, convert sekarang, dan langsung unduh!🔥
                                 </ListItem>
                             </Link>
                             <Link href="/signature-drawer">
                                 <ListItem title="Signature Drawer">
                                     Dari foto ke PDF? Semuanya bisa dalam sekejap dengan Converto!
-                                    Ubah gambar jadi dokumen keren, gampang banget, dan langsung siap share. 
+                                    Ubah gambar jadi dokumen keren, gampang banget, dan langsung siap share.
                                     Keep it simple, keep it classy, convert sekarang, dan langsung unduh!🔥
+                                </ListItem>
+                            </Link>
+                            <Link href="/sign-your-pdf">
+                                <ListItem title="e-Sign PDF">
+                                    Tandatangani dokumen PDF secara digital dengan aman dan cepat.
+                                    Lengkap dengan QR Code verifikasi bebas ojek dokumen fisik!
                                 </ListItem>
                             </Link>
                         </ul>
@@ -82,23 +88,23 @@ const NavMenuTab = () => {
 }
 
 const ListItem = React.forwardRef((props, ref) => {
-  const { className, title, children, ...rest } = props;
-  return (
-    <li>
-      <NavigationMenuLink asChild>
-        <a
-          ref={ref}
-          className={`block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground ${className}`}
-          {...rest}
-        >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-            {children}
-          </p>
-        </a>
-      </NavigationMenuLink>
-    </li>
-  );
+    const { className, title, children, ...rest } = props;
+    return (
+        <li>
+            <NavigationMenuLink asChild>
+                <a
+                    ref={ref}
+                    className={`block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground ${className}`}
+                    {...rest}
+                >
+                    <div className="text-sm font-medium leading-none">{title}</div>
+                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                        {children}
+                    </p>
+                </a>
+            </NavigationMenuLink>
+        </li>
+    );
 });
 ListItem.displayName = "ListItem";
 
