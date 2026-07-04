@@ -10,6 +10,8 @@ import { Rnd } from "react-rnd"
 import { QRCodeCanvas } from 'qrcode.react'
 import { useRef } from 'react';
 import { PDFDocument } from 'pdf-lib';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 // Setup pdf.js worker using CDN (Safe for Next.js build)
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -87,16 +89,18 @@ const PdfSignEditor = ({ file }) => {
             return
         }
         
-        // Simpan metadata ke LocalStorage sebagai simulasi Database
+        // Simpan metadata ke Firestore
         const docData = {
             fileName: file.name,
             signerName: signerName,
             timestamp: new Date().toISOString(),
             signatureImage: signatureData // Tarik dari memory internal, bukan dari layar
         }
-        localStorage.setItem(`converto_${docId}`, JSON.stringify(docData))
         
         try {
+            // Simpan ke Firestore
+            await setDoc(doc(db, "verified_documents", docId), docData)
+            
             // 1. Baca file PDF asli
             const arrayBuffer = await file.arrayBuffer()
             const pdfDoc = await PDFDocument.load(arrayBuffer)

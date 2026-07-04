@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { CheckCircle, XCircle } from '@phosphor-icons/react'
 import Header from "@/components/Header"
+import { doc, getDoc } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
 
 export default function VerifyPage() {
     const params = useParams()
@@ -12,12 +14,21 @@ export default function VerifyPage() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        // Simulasi pembacaan dari Database dengan membaca LocalStorage (MVP)
-        const stored = localStorage.getItem(`converto_${id}`)
-        if (stored) {
-            setDocData(JSON.parse(stored))
+        async function fetchDocument() {
+            if (!id) return
+            try {
+                const docRef = doc(db, "verified_documents", id)
+                const docSnap = await getDoc(docRef)
+                if (docSnap.exists()) {
+                    setDocData(docSnap.data())
+                }
+            } catch (error) {
+                console.error("Gagal mengambil data verifikasi dari Firestore:", error)
+            } finally {
+                setLoading(false)
+            }
         }
-        setLoading(false)
+        fetchDocument()
     }, [id])
 
     return (
