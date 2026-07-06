@@ -12,7 +12,7 @@ import { useRef } from 'react';
 import { PDFDocument } from 'pdf-lib';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { FilePdf, PenNib, QrCode, DownloadSimple, ArrowLeft, ArrowRight, X, Trash, ArrowCounterClockwise } from '@phosphor-icons/react';
+import { FilePdf, PenNib, QrCode, DownloadSimple, ArrowLeft, ArrowRight, X, Trash, ArrowCounterClockwise, Info } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
 // Setup pdf.js worker using CDN (Safe for Next.js build)
@@ -457,25 +457,41 @@ const PdfSignEditor = ({ file, onReset }) => {
                             ref={sigCanvas}
                             penColor="black"
                             canvasProps={{
-                                className: 'w-full sm:w-[600px] h-[200px] sm:h-[260px] bg-transparent cursor-crosshair'
+                                className: 'w-full sm:w-[600px] h-[200px] sm:h-[250px] bg-transparent cursor-crosshair'
                             }}
                         />
                         {/* Signature line hint */}
                         <div className="absolute bottom-10 left-8 right-8 border-b border-slate-200 dark:border-slate-700 pointer-events-none" />
-                        <span className="absolute bottom-4 left-8 text-[10px] text-slate-300 dark:text-slate-600 pointer-events-none uppercase tracking-widest font-medium">
-                            Tanda tangan di atas garis
-                        </span>
+
+                        <div className='flex flex-row justify-between'>
+                            <p className="absolute bottom-4 left-8 text-[10px] text-slate-300 dark:text-slate-600 pointer-events-none uppercase tracking-widest font-medium">
+                                Tanda tangan di atas garis
+                            </p>
+                            {/* Clear Button */}
+                            <div className="absolute bottom-3 right-8">
+                                <button
+                                    onClick={() => sigCanvas.current?.clear()}
+                                    className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors"
+                                >
+                                    <ArrowCounterClockwise className="w-3.5 h-3.5" />
+                                    Hapus & gambar ulang
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Clear Button */}
-                    <div className="flex justify-start px-6 mt-2">
-                        <button
-                            onClick={() => sigCanvas.current?.clear()}
-                            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors"
-                        >
-                            <ArrowCounterClockwise className="w-3.5 h-3.5" />
-                            Hapus & gambar ulang
-                        </button>
+
+                    {/* Multi-Signer Info Notice */}
+                    <div className="px-6 mt-2">
+                        <div className="bg-sky-50 dark:bg-sky-950/30 border border-sky-200/50 dark:border-sky-900/50 rounded-lg p-3 flex gap-3 items-start">
+                            <Info className="w-5 h-5 text-sky-500 shrink-0 mt-0.5" weight="fill" />
+                            <div>
+                                <h4 className="text-xs font-bold text-sky-800 dark:text-sky-400">Informasi Penandatangan Ganda</h4>
+                                <p className="text-[11px] text-sky-700/80 dark:text-sky-500/80 mt-0.5 leading-relaxed">
+                                    Anda bebas menambahkan QR Code kapan saja. Namun, jika dokumen ini ditandatangani bergantian (beda waktu), selalu pastikan untuk memindai <strong>QR Code milik penandatangan terakhir</strong> saat memverifikasi dokumen versi final.
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Output Options */}
