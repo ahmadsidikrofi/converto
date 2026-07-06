@@ -16,8 +16,10 @@ const Navbar = () => {
                 <Image src="/Converto-logo.png" width={728} height={728} alt='Converto Logo' className='w-10' />
                 <h2 className="text-3xl font-bold text-[#e5322d]">Converto</h2>
             </Link>
-            <div className="hidden lg:flex gap-3">
-                <NavMenuTab />
+            <div className="hidden z-20 lg:flex gap-3">
+                <div className="">
+                    <NavMenuTab />
+                </div>
                 <Link href="/about">
                     <Button variant="ghost" className="lg:text-lg font-medium">About</Button>
                 </Link>
@@ -27,12 +29,12 @@ const Navbar = () => {
             </div>
             <div className="hidden lg:flex items-center gap-3">
                 <Button variant="ghost" onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
-                    {theme === 'light' ? <SunIcon className="h-5 w-5"/> : <MoonIcon className="h-5 w-5"/>}
+                    {theme === 'light' ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
                 </Button>
                 <Link target="_blank" href="https://github.com/ahmadsidikrofi/converto">
                     <Button className="rounded-full bg-slate-800 p-3 flex items-center justify-center gap-3 dark:hover:bg-slate-800 dark:hover:text-white hover:bg-white  hover:text-slate-800">
-                        <p className="">Github Repo</p> 
-                        <GitHubLogoIcon className="w-4 h-4"/>
+                        <p className="">Github Repo</p>
+                        <GitHubLogoIcon className="w-4 h-4" />
                     </Button>
                 </Link>
             </div>

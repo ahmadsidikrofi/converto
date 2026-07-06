@@ -23,7 +23,7 @@ const MobileNavbar = () => {
                     <SheetHeader>
                         <SheetTitle className="mt-10 text-center">
                             <div className="flex gap-2 justify-center mb-5">
-                                <Button onClick={() => setTheme(theme === 'light' ?  'dark' : 'light')} variant='outline'>
+                                <Button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} variant='outline'>
                                     {theme === 'light' ? <MoonStars className="w-4 h-4" /> : <SunHorizon className="w-4 h-4" />}
                                 </Button>
                                 <Link target="_blank" href="https://github.com/ahmadsidikrofi/converto">
@@ -50,6 +50,9 @@ const MobileNavbar = () => {
                                 </Link>
                                 <Link href="/signature-drawer">
                                     <Button variant="ghost" className="text-sm lg:text-lg font-medium">Signature Drawer</Button>
+                                </Link>
+                                <Link href="/sign-your-pdf">
+                                    <Button variant="ghost" className="text-sm lg:text-lg font-medium">e-Sign PDF</Button>
                                 </Link>
                                 <Link href="/about">
                                     <Button variant="ghost" className="text-md font-medium">About</Button>

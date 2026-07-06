@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
@@ -13,9 +13,17 @@ import { PDFDocument } from 'pdf-lib';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { FilePdf, PenNib, QrCode, DownloadSimple, ArrowLeft, ArrowRight, X, Trash, ArrowCounterClockwise } from '@phosphor-icons/react';
+import { toast } from 'sonner';
 
 // Setup pdf.js worker using CDN (Safe for Next.js build)
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
+// Fungsi Hashing SHA-256
+async function calculateSHA256(bufferSource) {
+    const hashBuffer = await crypto.subtle.digest('SHA-256', bufferSource);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 const PdfSignEditor = ({ file, onReset }) => {
     const [numPages, setNumPages] = useState(null)
@@ -32,6 +40,32 @@ const PdfSignEditor = ({ file, onReset }) => {
 
     // Internal state untuk menyimpan gambar TTD asli apapun bentuk output di layarnya
     const [signatureData, setSignatureData] = useState(null)
+
+    const [pageHeight, setPageHeight] = useState(1131) // Tinggi A4 default untuk lebar 800px
+    const [scaleFactor, setScaleFactor] = useState(1)
+    const containerRef = useRef(null)
+
+    useEffect(() => {
+        const updateScale = () => {
+            if (!containerRef.current) return
+            // Ambil parent dari wrapper berskala
+            const parent = containerRef.current.parentElement?.parentElement
+            if (!parent) return
+            const parentWidth = parent.clientWidth - 32 // Kurangi padding horizontal (px-4 = 16px * 2)
+            if (parentWidth < 800) {
+                setScaleFactor(parentWidth / 800)
+            } else {
+                setScaleFactor(1)
+            }
+        }
+        updateScale()
+        window.addEventListener('resize', updateScale)
+        const timer = setTimeout(updateScale, 150)
+        return () => {
+            window.removeEventListener('resize', updateScale)
+            clearTimeout(timer)
+        }
+    }, [pageNumber, numPages])
 
     function onDocumentLoadSuccess(pdf) {
         setNumPages(pdf?.numPages || null)
@@ -76,35 +110,33 @@ const PdfSignEditor = ({ file, onReset }) => {
             setElements([...elements, ...newElements])
             setIsSignatureModalOpen(false)
         } else {
-            alert("Harap buat coretan terlebih dahulu!")
+            toast.info("Harap buat coretan terlebih dahulu", {
+                position: 'top-center',
+                style: { background: "#fee2e2", color: "#991b1b", border: "1px solid #b91c1c" },
+            })
         }
     }
 
     const handleFinishAndDownload = async () => {
         if (!signerName.trim()) {
-            alert("Mohon masukkan nama penandatangan terlebih dahulu!")
+            toast.info("Mohon masukkan nama penandatangan terlebih dahulu", {
+                position: 'top-center',
+                style: { background: "#fee2e2", color: "#991b1b", border: "1px solid #b91c1c" },
+            })
             return
         }
 
         if (!signatureData) {
-            alert("Mohon klik 'Buat Tanda Tangan' terlebih dahulu!")
+            toast.info("Mohon klik 'Buat Tanda Tangan' terlebih dahulu", {
+                position: 'top-center',
+                style: { background: "#fee2e2", color: "#991b1b", border: "1px solid #b91c1c" },
+            })
             return
         }
 
         setIsProcessing(true)
 
-        // Simpan metadata ke Firestore
-        const docData = {
-            fileName: file.name,
-            signerName: signerName,
-            timestamp: new Date().toISOString(),
-            signatureImage: signatureData
-        }
-
         try {
-            // Simpan ke Firestore
-            await setDoc(doc(db, "verified_documents", docId), docData)
-
             // 1. Baca file PDF asli
             const arrayBuffer = await file.arrayBuffer()
             const pdfDoc = await PDFDocument.load(arrayBuffer)
@@ -157,8 +189,23 @@ const PdfSignEditor = ({ file, onReset }) => {
                 }
             }
 
-            // 3. Simpan dan unduh PDF yang sudah diubah
+            // 3. Simpan (Merge) PDF ke dalam bentuk Bytes
             const pdfBytes = await pdfDoc.save()
+
+            // 4. Kalkulasi Hash SHA-256 dari PDF yang sudah final ditandatangani
+            const fileHash = await calculateSHA256(pdfBytes)
+
+            // 5. Simpan metadata & Hash ke Firestore
+            const docData = {
+                fileName: file.name,
+                signerName: signerName,
+                timestamp: new Date().toISOString(),
+                signatureImage: signatureData,
+                fileHash: fileHash // Kunci keamanan utama
+            }
+            await setDoc(doc(db, "verified_documents", docId), docData)
+
+            // 6. Unduh PDF ke komputer user
             const blob = new Blob([pdfBytes], { type: 'application/pdf' })
             const link = document.createElement('a')
             link.href = URL.createObjectURL(blob)
@@ -167,11 +214,17 @@ const PdfSignEditor = ({ file, onReset }) => {
             link.click()
             document.body.removeChild(link)
 
-            alert(`Selesai! PDF berhasil diunduh.\nSilakan buka file PDF-nya dan coba scan QR Codenya, atau buka tab baru ke:\n${window.location.origin}/verify/${docId}`)
+            toast.success(`PDF berhasil diunduh.\nSilakan buka file PDF-nya dan coba scan QR Codenya, atau buka tab baru ke:\n${window.location.origin}/verify/${docId}`, {
+                position: 'top-center',
+                style: { background: "#dcfce7", color: "#166534", border: "1px solid #4ade80" },
+            })
 
         } catch (error) {
             console.error("Error saat merge PDF:", error)
-            alert("Terjadi kesalahan saat memproses PDF. Silakan coba lagi.")
+            toast.error("Terjadi kesalahan saat memproses PDF. Silakan coba lagi.", {
+                position: 'top-center',
+                style: { background: "#fee2e2", color: "#991b1b", border: "1px solid #b91c1c" },
+            })
         } finally {
             setIsProcessing(false)
         }
@@ -295,32 +348,57 @@ const PdfSignEditor = ({ file, onReset }) => {
 
             {/* ========== PDF CANVAS AREA ========== */}
             <div className="flex-1 flex items-start justify-center overflow-auto py-6 px-4 sm:px-6">
-                <div className="relative bg-white dark:bg-slate-900 rounded-lg shadow-lg shadow-slate-200/80 dark:shadow-slate-950/80 ring-1 ring-slate-200/60 dark:ring-slate-800 overflow-hidden">
-                    <Document
-                        file={file}
-                        onLoadSuccess={onDocumentLoadSuccess}
-                        className="flex justify-center"
-                        loading={
-                            <div className="flex items-center justify-center p-20">
-                                <div className="flex flex-col items-center gap-3">
-                                    <div className="w-6 h-6 border-2 border-rose-400 border-t-transparent rounded-full animate-spin" />
-                                    <p className="text-sm text-slate-400">Memuat dokumen...</p>
-                                </div>
-                            </div>
-                        }
+                {/* Wrapper luar berskala agar ukuran layut terpakai secara akurat */}
+                <div
+                    style={{
+                        width: `${800 * scaleFactor}px`,
+                        height: `${pageHeight * scaleFactor}px`,
+                        overflow: 'hidden'
+                    }}
+                    className="shrink-0 transition-all duration-150"
+                >
+                    <div
+                        ref={containerRef}
+                        style={{
+                            transform: `scale(${scaleFactor})`,
+                            transformOrigin: 'top left',
+                            width: '800px',
+                            height: `${pageHeight}px`
+                        }}
+                        className="relative bg-white dark:bg-slate-900 rounded-lg shadow-lg shadow-slate-200/80 dark:shadow-slate-950/80 ring-1 ring-slate-200/60 dark:ring-slate-800"
                     >
-                        <Page
-                            pageNumber={pageNumber}
-                            renderTextLayer={false}
-                            renderAnnotationLayer={false}
-                            width={800}
-                        />
-                    </Document>
+                        <Document
+                            file={file}
+                            onLoadSuccess={onDocumentLoadSuccess}
+                            className="flex justify-center"
+                            loading={
+                                <div className="flex items-center justify-center p-20">
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="w-6 h-6 border-2 border-rose-400 border-t-transparent rounded-full animate-spin" />
+                                        <p className="text-sm text-slate-400">Memuat dokumen...</p>
+                                    </div>
+                                </div>
+                            }
+                        >
+                            <Page
+                                pageNumber={pageNumber}
+                                renderTextLayer={false}
+                                renderAnnotationLayer={false}
+                                width={800}
+                                onLoadSuccess={(page) => {
+                                    const origWidth = page.width || page.getViewport({ scale: 1 }).width;
+                                    const origHeight = page.height || page.getViewport({ scale: 1 }).height;
+                                    setPageHeight(800 * (origHeight / origWidth));
+                                }}
+                            />
+                        </Document>
+                    </div>
 
                     {/* Render elemen Draggable (Stiker TTD / QR Code) */}
                     {elements.filter(el => el.page === pageNumber).map((el) => (
                         <Rnd
                             key={el.id}
+                            scale={scaleFactor}
                             default={{
                                 x: el.x,
                                 y: el.y,
@@ -344,7 +422,7 @@ const PdfSignEditor = ({ file, onReset }) => {
                             className="group border-2 border-transparent hover:border-rose-400/50 hover:border-dashed absolute cursor-move z-50 transition-colors"
                         >
                             {el.type === 'signature' ? (
-                                <img src={el.content} alt="Signature" className="w-full h-full object-contain pointer-events-none" />
+                                <img src={el.content} alt="Signature" className="w-full h-full object-cover pointer-events-none" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center pointer-events-none bg-white rounded-sm">
                                     <QRCodeCanvas id={`qr-${el.id}`} value={el.content} size={512} style={{ width: '100%', height: '100%' }} />
