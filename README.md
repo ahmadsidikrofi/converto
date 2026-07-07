@@ -40,15 +40,21 @@
 - Trim and merge video clips
 - Powered by `@ffmpeg/ffmpeg` running entirely in the browser via WebAssembly
 
+### ✍️ e-Sign PDF & Verification (New!)
+- **Custom Digital Signature:** Draw signatures manually with full-precision ink brush tracking
+- **Secure Verification (QR Code):** Generate a unique QR Code verification link directly onto the PDF
+- **Cryptographic Integrity Check (SHA-256):** Calculates file hashes client-side via Web Crypto API to detect any modifications since signing
+- **Secure Firestore Registry:** Verifies integrity and document metadata without storing actual PDF files, keeping user documents 100% private
+- **Premium Responsive Interface:** Sleek, modern, and minimal design optimized for Desktop, Tablet, and Mobile layout scaling
+
 ### 🔒 Privacy & Security
-- All conversion processes run **client-side** — your files are never uploaded to a server
-- No database, no permanent file storage
-- Completely safe and private
+- All file conversion processes run **client-side** — your files are never uploaded to a server
+- **For PDF Signing:** The PDF is processed and downloaded entirely client-side. Only document metadata (signer name, timestamps, signature image) and the cryptographic SHA-256 hash are stored securely in Firestore for verification.
+- **No PDF File Storage:** We never store your actual PDF files on our servers, ensuring absolute document privacy
 
 ### 📦 Additional Features
 - Download converted files as a ZIP archive using `jszip`
 - Export to PDF using `jspdf`
-- Signature canvas support via `react-signature-canvas`
 - Dark mode with `next-themes`
 - Drag & drop file upload with `react-dropzone`
 - Fully responsive — works on desktop, tablet, and mobile
@@ -64,6 +70,10 @@
 | Styling | [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) (Radix UI) |
 | Video/Audio Processing | [@ffmpeg/ffmpeg](https://ffmpegwasm.netlify.app/) (WebAssembly) |
 | Image Processing | [browser-image-compression](https://github.com/Donaldcwl/browser-image-compression) |
+| Database | [Firebase Firestore](https://firebase.google.com/) (for document hash & metadata registry) |
+| PDF Reader & Writer | [pdf-lib](https://pdf-lib.js.org/) + [react-pdf](https://github.com/wojtekmaj/react-pdf) |
+| Draggable Components | [react-rnd](https://github.com/bokuweb/react-rnd) |
+| QR Code Generator | [qrcode.react](https://github.com/zpao/qrcode.react) |
 | Form Handling | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) |
 | File Archiving | [JSZip](https://stuk.github.io/jszip/) |
 | PDF Generation | [jsPDF](https://github.com/parallax/jsPDF) |
