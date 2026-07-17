@@ -1,20 +1,21 @@
 'use client'
-import Image from "next/image";
-import Dropzone from "@/components/Dropzone";
-import Header from "@/components/Header";
+import HeroSection from "@/components/landing/HeroSection"
+import ValueProp from "@/components/landing/ValueProp"
+import FeatureShowcase from "@/components/landing/FeatureShowcase"
+import HowItWorks from "@/components/landing/HowItWorks"
+import PrivacyDeepDive from "@/components/landing/PrivacyDeepDive"
+import Footer from "@/components/landing/Footer"
 
 export default function Home() {
   return (
-    <main className="flex flex-col items-center p-10">
-      <Header title="Infinite Free File Converter"
-        description="Buka potensi kreativitasmu dengan Converto – platform online andalan buat konversi multimedia 
-          tanpa batas dan gratis!. Ubah gambar, audio, dan video dengan mudah tanpa ada batasan. 
-          Mulai konversi sekarang dan bikin kontenmu jadi lebih keren! "
-      />
-
-      <div className="mt-16 text-center lg:max-w-5xl lg:w-full">
-        <Dropzone />
-      </div>
+    <main className="flex flex-col items-center w-full min-h-screen bg-background selection:bg-rose-500/30">
+      <HeroSection />
+      <ValueProp />
+      <FeatureShowcase />
+      <HowItWorks />
+      <PrivacyDeepDive />
+      <Footer />
     </main>
   );
 }
+
