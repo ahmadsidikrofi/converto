@@ -7,8 +7,14 @@ import MobileNavbar from "./MobileNavbar"
 import Image from "next/image"
 import { useTheme } from "next-themes"
 import NavMenuTab from "./NavigationMenu"
+import { usePathname } from "next/navigation"
 
 const Navbar = () => {
+    const pathname = usePathname()
+
+    const hiddenRoutes = ["/login", "/register"]
+    if (hiddenRoutes.includes(pathname)) return null
+
     const { theme, setTheme } = useTheme()
     return (
         <nav className={`flex items-center justify-between  max-sm:px-5 sm:px-5 md:px-16 py-7 shadow-[0_2px_4px_rgba(0,0,0,0.1)] transition-all duration-500 ease-linear `}>

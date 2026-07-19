@@ -118,3 +118,17 @@
     opacity: 1;
   }
 }
+
+.animate-fade-in-up {
+  opacity: 0;
+  animation: fadeIn 0.5s ease-out forwards, slideUpPage 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUpPage {
+  from {
+    transform: translateY(16px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
