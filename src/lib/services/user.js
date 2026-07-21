@@ -1,4 +1,4 @@
-import { getDoc, serverTimestamp, setDoc } from "firebase/firestore"
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore"
 import { db } from "../firebase"
 
 export async function postUserToFirestore(user, displayName = "") {
@@ -20,7 +20,7 @@ export async function postUserToFirestore(user, displayName = "") {
         })
     } else {
         await setDoc(userRef, {
-            displayName: displayName || user.displayName || userSnap.data().displayName || "",
+            name: displayName || user.displayName || userSnap.data().displayName || "",
             updatedAt: serverTimestamp(),
         }, { merge: true })
     }

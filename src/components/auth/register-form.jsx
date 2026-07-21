@@ -54,7 +54,8 @@ export function RegisterForm({
             setIsLoading(true)
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-                const user = userCredential.user
+                const res = userCredential.user
+                await postUserToFirestore(res)
                 router.push('/')
             } catch (error) {
                 if (error.code === "auth/email-already-in-use") {

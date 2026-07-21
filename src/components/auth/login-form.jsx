@@ -12,6 +12,7 @@ import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 
 import { auth } from "@/lib/firebase"
 import { Eye, EyeClosed, Loader } from "lucide-react"
 import ResetPassword from "./ResetPassword"
+import { postUserToFirestore } from "@/lib/services/user"
 
 export function LoginForm({
   className,
@@ -70,6 +71,7 @@ export function LoginForm({
     try {
       setIsLoading(true)
       const res = await signInWithPopup(auth, provider)
+      await postUserToFirestore(res.user)
       router.push('/')
     } catch (error) {
       console.error("Gagal masuk lewat Google:", error.code, error.message)

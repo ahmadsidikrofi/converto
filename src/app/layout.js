@@ -3,6 +3,8 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner"
 import ThemeProvider from "@/components/ui/theme-provider";
+import { AuthProvider } from "@/lib/contexts/AuthContext";
+import SmoothScroller from "@/components/SmoothScroller";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,11 +27,15 @@ export default function RootLayout({ children }) {
           disableTransitionOnChange
           themes={['light', 'dark']}
         >
-          <Navbar />
-          <Toaster />
-          <main>
-            {children}
-          </main>
+          <SmoothScroller>
+            <AuthProvider>
+              <Navbar />
+              <Toaster />
+              <main>
+                {children}
+              </main>
+            </AuthProvider>
+          </SmoothScroller>
         </ThemeProvider>
       </body>
     </html>
