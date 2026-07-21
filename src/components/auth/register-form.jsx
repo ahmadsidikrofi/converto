@@ -3,13 +3,14 @@
 import React, { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import ButtonBlobFill from "./shadcn-space/radix/button/ButtonBlobFill"
-import InputWithAnimatedCheckmark from "./shadcn-space/radix/input/InputWithAnimatedCheckmark"
+import ButtonBlobFill from "../shadcn-space/radix/button/ButtonBlobFill"
+import InputWithAnimatedCheckmark from "../shadcn-space/radix/input/InputWithAnimatedCheckmark"
 import Link from "next/link"
 import { auth } from "@/lib/firebase"
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth"
 import { useRouter } from "next/navigation"
 import { Loader } from "lucide-react"
+import { postUserToFirestore } from "@/lib/services/user"
 
 export function RegisterForm({
     className,
@@ -76,6 +77,7 @@ export function RegisterForm({
         try {
             setIsLoading(true)
             const res = await signInWithPopup(auth, provider)
+            await postUserToFirestore(res.user)
             router.push('/')
         } catch (error) {
             console.error("Gagal masuk lewat Google:", error.code, error.message)

@@ -1,7 +1,7 @@
 
-import { LoginForm } from "@/components/login-form"
+import { LoginForm } from "@/components/auth/login-form"
 import Image from "next/image";
-import AuthBackground from "@/components/AuthBackground";
+import AuthBackground from "@/components/auth/AuthBackground";
 
 export default function LoginPage() {
   return (

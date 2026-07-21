@@ -1,6 +1,6 @@
-import { RegisterForm } from "@/components/register-form";
+import { RegisterForm } from "@/components/auth/register-form";
 import Image from "next/image";
-import AuthBackground from "@/components/AuthBackground";
+import AuthBackground from "@/components/auth/AuthBackground";
 
 export default function RegisterPage() {
     return (

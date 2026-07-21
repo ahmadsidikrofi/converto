@@ -5,12 +5,13 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import ButtonBlobFill from "./shadcn-space/radix/button/ButtonBlobFill"
+import ButtonBlobFill from "../shadcn-space/radix/button/ButtonBlobFill"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { Eye, EyeClosed, Loader } from "lucide-react"
+import ResetPassword from "./ResetPassword"
 
 export function LoginForm({
   className,
@@ -21,7 +22,12 @@ export function LoginForm({
   const [errors, setErrors] = useState({ email: "", password: "" })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [openResetPassword, setOpenResetPassword] = useState(false)
   const router = useRouter()
+
+  if (openResetPassword) {
+    return <ResetPassword onBack={() => setOpenResetPassword(false)} className={className} {...props} />
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -147,9 +153,9 @@ export function LoginForm({
                 <div className="grid gap-2">
                   <div className="flex items-center">
                     <Label htmlFor="password" className="text-slate-300 text-sm">Kata Sandi</Label>
-                    <a href="#" className="ml-auto text-xs text-slate-500 hover:text-[#e5322d] underline-offset-4 hover:underline transition-colors">
+                    <Button onClick={() => setOpenResetPassword(true)} variant="link" className="h-auto p-0 ml-auto text-xs text-slate-500 hover:text-[#e5322d] underline-offset-4 hover:underline transition-colors">
                       Lupa kata sandi?
-                    </a>
+                    </Button>
                   </div>
                   <Input
                     id="password"
