@@ -9,17 +9,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { CircleUserRound, CreditCard, ReceiptText, Settings, LogOut } from "lucide-react";
+import { LogOut, LayoutDashboard, History, SlidersHorizontal, ShieldCheck, Crown } from "lucide-react";
 
 const PROFILE_ITEMS = [
-  { label: "My Profile", icon: CircleUserRound },
-  // { label: "My Subscription", icon: CreditCard },
-  // { label: "My Invoice", icon: ReceiptText },
+  { label: "Dasbor Utama", icon: LayoutDashboard },
+  { label: "Riwayat Konversi", icon: History },
+  { label: "Preset Saya", icon: SlidersHorizontal },
 ];
 
 const SETTINGS_ITEMS = [
-  { label: "Pengaturan Akun", icon: Settings },
+  { label: "Profil & Keamanan", icon: ShieldCheck },
+  { label: "Langganan (Converto Pro)", icon: Crown },
 ];
 
 const LOGOUT_ITEM = {
@@ -36,7 +39,7 @@ const Dropdown = ({
   defaultOpen,
   align = "end"
 }) => {
-  const { user, userData, loading, logout } = useAuth()
+  const { user, loading, logout } = useAuth();
 
   return (
     <div className="flex items-center justify-center">
@@ -54,9 +57,9 @@ const Dropdown = ({
               <div className="relative">
                 <Avatar className="size-10">
                   <AvatarImage
-                    src={userData?.profilePicture || `https://ui-avatars.com/api/?name=${userData?.fullName?.slice(0, 2)}&background=random`}
-                    alt={userData?.fullName || "User"} />
-                  <AvatarFallback>{userData?.fullName?.slice(0, 2) || "DM"}</AvatarFallback>
+                    src={user?.photoURL || user?.displayName?.slice(0, 2) || "AO"}
+                    alt={user?.displayName || "User"} />
+                  <AvatarFallback>{user?.displayName?.slice(0, 2) || "AO"}</AvatarFallback>
                 </Avatar>
                 <span
                   className="ring-card absolute right-0 bottom-0 size-2 rounded-full bg-green-600 ring-2" />
@@ -76,7 +79,7 @@ const Dropdown = ({
 
             {/* Main Links */}
             {PROFILE_ITEMS.map(({ label, icon: Icon }) => (
-              <DropdownMenuItem key={label} className={itemClass}>
+              <DropdownMenuItem key={label} className={itemClass} disabled>
                 <Icon size={20} />
                 <span>{label}</span>
               </DropdownMenuItem>
@@ -87,7 +90,7 @@ const Dropdown = ({
             {/* Settings */}
             <DropdownMenuGroup>
               {SETTINGS_ITEMS.map(({ label, icon: Icon }) => (
-                <DropdownMenuItem key={label} className={itemClass}>
+                <DropdownMenuItem key={label} className={itemClass} disabled>
                   <Icon size={20} />
                   <span>{label}</span>
                 </DropdownMenuItem>
@@ -109,6 +112,20 @@ const Dropdown = ({
 };
 
 const DropdownMenuProfile = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) return null;
+
+  if (!user) {
+    return (
+      <Link href="/login">
+        <Button className="rounded-full px-5 py-2.5 bg-[#e5322d] hover:bg-red-700 duration-100 text-white font-bold text-sm shadow-lg shadow-rose-500/25 transition-transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+          Masuk
+        </Button>
+      </Link>
+    );
+  }
+
   return (
     <Dropdown
       align="center"
@@ -116,9 +133,9 @@ const DropdownMenuProfile = () => {
         <div className="rounded-full">
           <Avatar className="size-10 cursor-pointer">
             <AvatarImage
-              src="https://images.shadcnspace.com/assets/profiles/user-11.jpg"
-              alt="David McMichael" />
-            <AvatarFallback>DM</AvatarFallback>
+              src={user?.photoURL || user?.displayName?.slice(0, 2) || "AO"}
+              alt={user?.displayName} />
+            <AvatarFallback>{user?.displayName?.slice(0, 2) || "AO"}</AvatarFallback>
           </Avatar>
         </div>
       } />

@@ -9,7 +9,7 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select"  
+} from "@/components/ui/select"
 import { Button } from "./ui/button"
 import { useToast } from "./ui/use-toast"
 import ReactDropzone from "react-dropzone";
@@ -20,38 +20,48 @@ import ConvertFile from "../../utils/convertFile"
 import { useEffect, useRef, useState } from "react"
 import IconFile from "../../utils/icon-file"
 import { BoxArrowUp, FileIni, SpinnerGap, Warning } from "@phosphor-icons/react"
+import ShimmerProgress from "./shadcn-space/radix/progress/ShimmerProgress"
 const extensions = {
     image: [
-      "jpg",
-      "jpeg",
-      "png",
-      "gif",
-      "bmp",
-      "webp",
-      "ico",
-      "tif",
-      "tiff",
-      "tga",
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "bmp",
+        "webp",
+        "ico",
+        "tif",
+        "tiff",
+        "tga",
     ],
     video: [
-      "mp4",
-      "m4v",
-      "mp4v",
-      "3gp",
-      "3g2",
-      "avi",
-      "mov",
-      "wmv",
-      "mkv",
-      "flv",
-      "ogv",
-      "webm",
-      "h264",
-      "264",
-      "hevc",
-      "265",
+        "mp4",
+        "m4v",
+        "mp4v",
+        "3gp",
+        "3g2",
+        "avi",
+        "mov",
+        "wmv",
+        "mkv",
+        "flv",
+        "ogv",
+        "webm",
+        "h264",
+        "264",
+        "hevc",
+        "265",
     ],
     audio: ["mp3", "wav", "ogg", "aac", "wma", "flac", "m4a"],
+};
+const formatETA = (seconds) => {
+    if (seconds === null || seconds === undefined) return null;
+    if (seconds < 0) return "Tunggu sebentar lagi...";
+    if (seconds === 0) return "Hampir selesai...";
+    if (seconds < 60) return `${Math.ceil(seconds)} detik`;
+    const m = Math.floor(seconds / 60);
+    const s = Math.ceil(seconds % 60);
+    return `${m}m ${s}s`;
 };
 
 const Dropzone = () => {
@@ -63,6 +73,10 @@ const Dropzone = () => {
     const [isLoaded, setIsLoaded] = useState(false)
     const [isConverting, setIsConvert] = useState(false)
     const [isDone, setIsDone] = useState(false)
+    const [progress, setProgress] = useState(0)
+    const [timeRemaining, setTimeRemaining] = useState(null)
+    const startTimeRef = useRef(null)
+    const estimatedTotalTimeRef = useRef(null)
     const ffmpegRef = useRef(null)
     const [defaultValues, setDefaultValues] = useState("video")
     const [hoverFileType, setHoverFileType] = useState(null)
@@ -126,6 +140,10 @@ const Dropzone = () => {
         if (!ffmpegRef.current) return
         setIsLoaded(true)
         setIsConvert(true)
+        setProgress(5)
+        setTimeRemaining(null)
+        startTimeRef.current = Date.now()
+        estimatedTotalTimeRef.current = null;
         let convertingAction = actions.map((action) => ({
             ...action,
             is_converting: true,
@@ -135,11 +153,66 @@ const Dropzone = () => {
         setActions(convertingAction)
         const ffmpeg = ffmpegRef.current
 
+        let currentProgress = 5;
+
+        // Track ffmpeg progress callback & smooth fallback timer for heavy files
+        const progressInterval = setInterval(() => {
+            const elapsed = (Date.now() - startTimeRef.current) / 1000;
+            
+            if (estimatedTotalTimeRef.current) {
+                // If we have an estimated total, sync percentage with ETA perfectly
+                const expectedPct = (elapsed / estimatedTotalTimeRef.current) * 100;
+                const targetPct = Math.min(99, Math.max(currentProgress, expectedPct));
+                
+                if (currentProgress < targetPct) {
+                    currentProgress += Math.max(0.1, (targetPct - currentProgress) / 2);
+                }
+                
+                setProgress(Math.round(currentProgress));
+                setTimeRemaining(estimatedTotalTimeRef.current - elapsed);
+            } else {
+                // Fallback for initial phase or non-progressing files (like small images)
+                if (currentProgress < 30) {
+                    currentProgress += 1;
+                } else if (currentProgress < 75) {
+                    currentProgress += 0.2;
+                }
+                setProgress(Math.round(currentProgress));
+            }
+        }, 1000);
+
         try {
+            ffmpeg.on("progress", ({ progress: p }) => {
+                const pct = Math.min(99, Math.round(p * 100))
+                if (!isNaN(pct) && pct > 0) {
+                    if (startTimeRef.current && pct > 5) {
+                        const elapsed = (Date.now() - startTimeRef.current) / 1000;
+                        // Update estimated total from real FFmpeg progress
+                        estimatedTotalTimeRef.current = elapsed / (pct / 100);
+                        setTimeRemaining(estimatedTotalTimeRef.current - elapsed);
+                    }
+                    
+                    if (pct > currentProgress) {
+                        currentProgress = pct;
+                        setProgress(Math.round(currentProgress));
+                    }
+                }
+            })
+        } catch (e) {
+            console.log("Progress listener fallback", e)
+        }
+
+        try {
+            const totalFiles = convertingAction.length
+            let completedCount = 0
+
             const convertedFiles = await Promise.all(
                 convertingAction.map(async (action) => {
                     try {
                         const result = await ConvertFile(ffmpeg, action);
+                        completedCount++
+                        const stepPct = Math.round((completedCount / totalFiles) * 100)
+                        setProgress((prev) => Math.max(prev, stepPct))
                         return {
                             ...action,
                             is_converting: false,
@@ -159,6 +232,8 @@ const Dropzone = () => {
                     }
                 })
             )
+            clearInterval(progressInterval)
+            setProgress(100)
             setActions(convertedFiles)
             setIsLoaded(false)
             setIsConvert(false)
@@ -179,6 +254,7 @@ const Dropzone = () => {
                 })
             }
         } catch (error) {
+            clearInterval(progressInterval);
             console.error('Conversion failed', error);
             toast({
                 title: "Conversion Failed",
@@ -186,7 +262,8 @@ const Dropzone = () => {
                 duration: 3000
             })
             setIsLoaded(false);
-        }    
+            setIsConvert(false);
+        }
     }
 
     const handleHover = () => setIsHover(true)
@@ -284,14 +361,18 @@ const Dropzone = () => {
                                 <CheckCircledIcon />
                             </Badge>
                         ) : action.is_converting ? (
-                            <Badge className="flex gap-2 items-center p-1 lg:mx-20 max-sm:mx-8">
-                                <span>Converting</span>
-                                <SpinnerGap className="animate-spin" />
-                            </Badge>
+                            <div className="w-52 lg:mx-8 max-sm:mx-8">
+                                <ShimmerProgress
+                                    variant="inline"
+                                    value={action.progress || progress}
+                                    statusText="Mengonversi..."
+                                    showPercentage={true}
+                                />
+                            </div>
                         ) : action.is_error ? (
                             <Badge variant='destructive' className="p-1 lg:mx-20 lg:w-[25rem] flex gap-2 max-sm:mx-8">
                                 <span>Failed when converting</span>
-                                <Warning className="w-4 h-4"/>
+                                <Warning className="w-4 h-4" />
                             </Badge>
 
                         ) : (
@@ -380,6 +461,17 @@ const Dropzone = () => {
                         </div>
                     </div>
                 ))}
+                {isConverting && (
+                    <div className="my-6">
+                        <ShimmerProgress
+                            variant="master"
+                            value={progress}
+                            statusText={progress >= 100 ? "Konversi Selesai!" : `Mengonversi ${actions.length} berkas...`}
+                            showPercentage={true}
+                            eta={formatETA(timeRemaining)}
+                        />
+                    </div>
+                )}
                 <div className="flex justify-end">
                     {isDone ? (
                         <div className="flex flex-col justify-center gap-3 max-sm:mx-8">
@@ -440,7 +532,7 @@ const Dropzone = () => {
                         {isHover ? (
                             <>
                                 <div className="flex flex-col items-center justify-center gap-3 my-3">
-                                    <FileIni className="w-14 h-14 text-[#e5322d]"/>
+                                    <FileIni className="w-14 h-14 text-[#e5322d]" />
                                     <p className="md:text-xl sm:text-sm max-sm:text-sm font-semibold">Drop it here 🤩</p>
                                 </div>
                             </>
@@ -462,5 +554,5 @@ const Dropzone = () => {
     )
 
 }
- 
+
 export default Dropzone;

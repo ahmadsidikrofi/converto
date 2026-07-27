@@ -41,10 +41,6 @@ export default function HeroSection() {
             </div>
 
             <div className="z-10 flex flex-col items-center text-center px-4 max-w-4xl">
-                <div className="hero-content opacity-0 bg-rose-100 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide flex items-center gap-2 mb-6 border border-rose-200 dark:border-rose-900/50 shadow-sm">
-                    Memperkenalkan Converto
-                </div>
-
                 <h1 className="hero-content opacity-0 text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-[1.1]">
                     Ubah & Tanda Tangani <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#e5322d] to-rose-400">

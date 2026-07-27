@@ -25,31 +25,54 @@ export default async function ConvertFile(ffmpeg, action) {
 
     // FFMEG COMMANDS
     let ffmpeg_cmd = [];
-    // 3gp video
+
     if (to === '3gp') {
         ffmpeg_cmd = [
-            '-i',
-            input,
-            '-r',
-            '20',
-            '-s',
-            '352x288',
-            '-vb',
-            '400k',
-            '-acodec',
-            'aac',
-            '-strict',
-            'experimental',
-            '-ac',
-            '1',
-            '-ar',
-            '8000',
-            '-ab',
-            '24k',
+            '-i', input,
+            '-r', '20',
+            '-s', '352x288',
+            '-vb', '400k',
+            '-acodec', 'aac',
+            '-strict', 'experimental',
+            '-ac', '1',
+            '-ar', '8000',
+            '-ab', '24k',
             output,
         ];
+    } else if (['mp4', 'm4v', 'mov', 'mkv'].includes(to)) {
+        // Ultrafast preset for x264 in WASM
+        ffmpeg_cmd = [
+            '-i', input,
+            '-c:v', 'libx264',
+            '-preset', 'ultrafast',
+            '-crf', '28',
+            '-c:a', 'aac',
+            '-b:a', '128k',
+            output,
+        ];
+    } else if (to === 'avi') {
+        ffmpeg_cmd = [
+            '-i', input,
+            '-c:v', 'mpeg4',
+            '-vtag', 'XVID',
+            '-q:v', '6',
+            '-c:a', 'libmp3lame',
+            output,
+        ];
+    } else if (to === 'webm') {
+        ffmpeg_cmd = [
+            '-i', input,
+            '-c:v', 'libvpx',
+            '-crf', '32',
+            '-b:v', '1M',
+            '-c:a', 'libvorbis',
+            output,
+        ];
+    } else if (['mp3', 'wav', 'ogg', 'aac', 'wma', 'flac', 'm4a'].includes(to)) {
+        // Fast audio extraction (-vn removes video stream processing)
+        ffmpeg_cmd = ['-i', input, '-vn', output];
     } else {
-        ffmpeg_cmd = ['-i', input, output]
+        ffmpeg_cmd = ['-i', input, output];
     }
 
     // execute cmd
