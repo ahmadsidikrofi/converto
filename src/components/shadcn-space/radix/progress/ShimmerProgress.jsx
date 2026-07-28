@@ -36,7 +36,15 @@ export default function ShimmerProgress({
   const isCompleted =
     typeof controlledIsCompleted === "boolean"
       ? controlledIsCompleted
-      : progress >= 100 || internalCompleted;
+      : progress >= 100 || (!isControlled && internalCompleted);
+
+  // Reset internal states when starting a new controlled conversion
+  useEffect(() => {
+    if (isControlled && controlledValue < 100) {
+      setInternalCompleted(false);
+      setInternalProgress(0);
+    }
+  }, [isControlled, controlledValue]);
 
   // Speed Configuration Mapping for simulated progress
   const config = useMemo(

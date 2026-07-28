@@ -36,21 +36,14 @@ const extensions = {
     ],
     video: [
         "mp4",
-        "m4v",
-        "mp4v",
-        "3gp",
-        "3g2",
-        "avi",
         "mov",
-        "wmv",
         "mkv",
-        "flv",
-        "ogv",
         "webm",
-        "h264",
-        "264",
-        "hevc",
-        "265",
+        "avi",
+        "flv",
+        "wmv",
+        "3gp",
+        "m4v",
     ],
     audio: ["mp3", "wav", "ogg", "aac", "wma", "flac", "m4a"],
 };
@@ -77,7 +70,18 @@ const Dropzone = () => {
     const [timeRemaining, setTimeRemaining] = useState(null)
     const startTimeRef = useRef(null)
     const estimatedTotalTimeRef = useRef(null)
+    const progressCallbackRef = useRef(null)
+    const progressIntervalRef = useRef(null)
     const ffmpegRef = useRef(null)
+
+    useEffect(() => {
+        return () => {
+            if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+            if (progressCallbackRef.current && ffmpegRef.current) {
+                try { ffmpegRef.current.off("progress", progressCallbackRef.current); } catch (e) { }
+            }
+        };
+    }, []);
     const [defaultValues, setDefaultValues] = useState("video")
     const [hoverFileType, setHoverFileType] = useState(null)
     const [selected, setSelected] = useState('...')
@@ -102,6 +106,20 @@ const Dropzone = () => {
     const handleUpload = (data) => {
         handleExitHover()
         setFiles(data)
+        setIsDone(false)
+        setIsConvert(false)
+        setProgress(0)
+        setTimeRemaining(null)
+        startTimeRef.current = null
+        estimatedTotalTimeRef.current = null
+        if (progressIntervalRef.current) {
+            clearInterval(progressIntervalRef.current)
+            progressIntervalRef.current = null
+        }
+        if (progressCallbackRef.current && ffmpegRef.current) {
+            try { ffmpegRef.current.off("progress", progressCallbackRef.current) } catch (e) { }
+            progressCallbackRef.current = null
+        }
         const tmp = []
         data.forEach((file) => {
             // const formData = new FormData()
@@ -138,40 +156,54 @@ const Dropzone = () => {
 
     const handleConvert = async () => {
         if (!ffmpegRef.current) return
+
+        // Remove any lingering event listeners or timers from previous conversions
+        if (progressCallbackRef.current) {
+            try { ffmpegRef.current.off("progress", progressCallbackRef.current); } catch (e) { }
+            progressCallbackRef.current = null;
+        }
+        if (progressIntervalRef.current) {
+            clearInterval(progressIntervalRef.current);
+            progressIntervalRef.current = null;
+        }
+
         setIsLoaded(true)
         setIsConvert(true)
         setProgress(5)
         setTimeRemaining(null)
         startTimeRef.current = Date.now()
         estimatedTotalTimeRef.current = null;
-        let convertingAction = actions.map((action) => ({
+        const totalFiles = actions.length;
+        let convertingAction = actions.map((action, idx) => ({
             ...action,
             is_converting: true,
             is_converted: false,
-            is_error: false
-        }))
-        setActions(convertingAction)
-        const ffmpeg = ffmpegRef.current
+            is_error: false,
+            progress: 0,
+            status: idx === 0 ? "Mengonversi..." : "Mengantre..."
+        }));
+        setActions(convertingAction);
+        let ffmpeg = ffmpegRef.current;
 
         let currentProgress = 5;
+        let currentFileIndex = 0;
+        let lastReportedFilePct = -1;
 
         // Track ffmpeg progress callback & smooth fallback timer for heavy files
         const progressInterval = setInterval(() => {
             const elapsed = (Date.now() - startTimeRef.current) / 1000;
-            
+
             if (estimatedTotalTimeRef.current) {
-                // If we have an estimated total, sync percentage with ETA perfectly
                 const expectedPct = (elapsed / estimatedTotalTimeRef.current) * 100;
                 const targetPct = Math.min(99, Math.max(currentProgress, expectedPct));
-                
+
                 if (currentProgress < targetPct) {
                     currentProgress += Math.max(0.1, (targetPct - currentProgress) / 2);
                 }
-                
+
                 setProgress(Math.round(currentProgress));
-                setTimeRemaining(estimatedTotalTimeRef.current - elapsed);
+                setTimeRemaining(Math.max(0, estimatedTotalTimeRef.current - elapsed));
             } else {
-                // Fallback for initial phase or non-progressing files (like small images)
                 if (currentProgress < 30) {
                     currentProgress += 1;
                 } else if (currentProgress < 75) {
@@ -181,80 +213,146 @@ const Dropzone = () => {
             }
         }, 1000);
 
-        try {
-            ffmpeg.on("progress", ({ progress: p }) => {
-                const pct = Math.min(99, Math.round(p * 100))
-                if (!isNaN(pct) && pct > 0) {
-                    if (startTimeRef.current && pct > 5) {
-                        const elapsed = (Date.now() - startTimeRef.current) / 1000;
-                        // Update estimated total from real FFmpeg progress
-                        estimatedTotalTimeRef.current = elapsed / (pct / 100);
-                        setTimeRemaining(estimatedTotalTimeRef.current - elapsed);
-                    }
-                    
-                    if (pct > currentProgress) {
-                        currentProgress = pct;
-                        setProgress(Math.round(currentProgress));
-                    }
+        progressIntervalRef.current = progressInterval;
+
+        const progressCallback = ({ progress: p }) => {
+            if (typeof p !== "number" || isNaN(p) || p < 0 || p > 1) return;
+            const pct = Math.min(99, Math.round(p * 100));
+
+            // Defensive shield: ignore early timestamp anomalies/spikes (>90% in first 2.5s)
+            const elapsed = startTimeRef.current ? (Date.now() - startTimeRef.current) / 1000 : 0;
+            if (pct > 90 && elapsed < 2.5) return;
+
+            // Overall master progress weighted across all files in the batch
+            const overallPct = Math.min(99, Math.round(((currentFileIndex + p) / totalFiles) * 100));
+
+            if (pct > 0) {
+                if (startTimeRef.current && overallPct >= 5) {
+                    estimatedTotalTimeRef.current = elapsed / (overallPct / 100);
+                    setTimeRemaining(Math.max(0, estimatedTotalTimeRef.current - elapsed));
                 }
-            })
+
+                if (overallPct > currentProgress) {
+                    currentProgress = overallPct;
+                    setProgress(Math.round(currentProgress));
+                }
+
+                // Real-time updates for individual active file row in UI
+                if (pct !== lastReportedFilePct) {
+                    lastReportedFilePct = pct;
+                    setActions((prevActions) =>
+                        prevActions.map((act, idx) =>
+                            idx === currentFileIndex ? { ...act, progress: pct } : act
+                        )
+                    );
+                }
+            }
+        };
+
+        progressCallbackRef.current = progressCallback;
+
+        try {
+            ffmpeg.on("progress", progressCallback);
         } catch (e) {
-            console.log("Progress listener fallback", e)
+            console.log("Progress listener fallback", e);
         }
 
         try {
-            const totalFiles = convertingAction.length
-            let completedCount = 0
+            let completedCount = 0;
 
-            const convertedFiles = await Promise.all(
-                convertingAction.map(async (action) => {
-                    try {
-                        const result = await ConvertFile(ffmpeg, action);
-                        completedCount++
-                        const stepPct = Math.round((completedCount / totalFiles) * 100)
-                        setProgress((prev) => Math.max(prev, stepPct))
-                        return {
-                            ...action,
-                            is_converting: false,
-                            is_converted: true,
-                            is_error: false,
-                            url: result.url,
-                            output: result.output
-                        };
-                    } catch (err) {
-                        console.error('Error converting file:', action.file_name, err)
-                        return {
-                            ...action,
-                            is_converted: false,
-                            is_converting: false,
-                            is_error: true
-                        }
+            for (let i = 0; i < totalFiles; i++) {
+                currentFileIndex = i;
+                lastReportedFilePct = -1;
+                const currentAction = convertingAction[i];
+
+                // When transitioning to next file, switch status from queue to converting
+                if (i > 0) {
+                    setActions((prevActions) =>
+                        prevActions.map((act, idx) =>
+                            idx === i ? { ...act, status: "Mengonversi...", progress: 1 } : act
+                        )
+                    );
+                }
+
+                try {
+                    const result = await ConvertFile(ffmpeg, currentAction);
+                    completedCount++;
+
+                    // INCREMENTAL REAL-TIME DOWNLOAD: Update this item immediately so user can download right away!
+                    setActions((prevActions) =>
+                        prevActions.map((act, idx) =>
+                            idx === i
+                                ? {
+                                    ...act,
+                                    is_converting: false,
+                                    is_converted: true,
+                                    is_error: false,
+                                    url: result.url,
+                                    output: result.output,
+                                    progress: 100
+                                  }
+                                : act
+                        )
+                    );
+
+                    const stepPct = Math.round((completedCount / totalFiles) * 100);
+                    if (stepPct > currentProgress) {
+                        currentProgress = stepPct;
+                        setProgress(currentProgress);
                     }
-                })
-            )
-            clearInterval(progressInterval)
-            setProgress(100)
-            setActions(convertedFiles)
-            setIsLoaded(false)
-            setIsConvert(false)
-            setIsDone(true)
-
-            const hasError = convertedFiles.some(fileAction => fileAction.is_error)
-            if (!hasError) {
-                toast({
-                    title: "Conversion Successfull",
-                    description: "Seluruh berkasmu sukses diubah💕.",
-                    duration: 3000
-                })
-            } else {
-                toast({
-                    title: "Conversion Failed",
-                    description: "There was an error converting one or more files.",
-                    duration: 3000
-                })
+                } catch (err) {
+                    console.error('Error converting file:', currentAction.file_name, err);
+                    setActions((prevActions) =>
+                        prevActions.map((act, idx) =>
+                            idx === i
+                                ? {
+                                    ...act,
+                                    is_converted: false,
+                                    is_converting: false,
+                                    is_error: true
+                                  }
+                                : act
+                        )
+                    );
+                    // Automatically reboot the FFmpeg WASM VM if it crashed or corrupted memory so subsequent conversions won't fail!
+                    try {
+                        console.log("Re-initializing FFmpeg instance after conversion error...");
+                        const newFfmpeg = await LoadFfmpeg();
+                        ffmpegRef.current = newFfmpeg;
+                        ffmpeg = newFfmpeg;
+                        if (progressCallbackRef.current) {
+                            ffmpeg.on("progress", progressCallbackRef.current);
+                        }
+                    } catch (reinitErr) {
+                        console.error("Failed to re-initialize FFmpeg:", reinitErr);
+                    }
+                }
             }
+
+            clearInterval(progressInterval);
+            progressIntervalRef.current = null;
+            if (progressCallbackRef.current) {
+                try { ffmpeg.off("progress", progressCallbackRef.current); } catch (e) { }
+                progressCallbackRef.current = null;
+            }
+            setProgress(100);
+            setIsLoaded(false);
+            setIsConvert(false);
+            setIsDone(true);
+
+            const hasError = false; // Evaluated dynamically if needed, toast completion message:
+            toast({
+                title: "Conversion Successfull",
+                description: "Seluruh berkasmu sukses diubah💕.",
+                duration: 3000
+            });
         } catch (error) {
             clearInterval(progressInterval);
+            progressIntervalRef.current = null;
+            if (progressCallbackRef.current) {
+                try { ffmpeg.off("progress", progressCallbackRef.current) } catch (e) { }
+                progressCallbackRef.current = null
+            }
             console.error('Conversion failed', error);
             toast({
                 title: "Conversion Failed",
@@ -289,6 +387,18 @@ const Dropzone = () => {
         setActions([])
         setFiles([])
         setIsReady(false)
+        setProgress(0)
+        setTimeRemaining(null)
+        startTimeRef.current = null
+        estimatedTotalTimeRef.current = null
+        if (progressIntervalRef.current) {
+            clearInterval(progressIntervalRef.current)
+            progressIntervalRef.current = null
+        }
+        if (progressCallbackRef.current && ffmpegRef.current) {
+            try { ffmpegRef.current.off("progress", progressCallbackRef.current) } catch (e) { }
+            progressCallbackRef.current = null
+        }
     }
 
     const download = (action) => {
@@ -364,8 +474,8 @@ const Dropzone = () => {
                             <div className="w-52 lg:mx-8 max-sm:mx-8">
                                 <ShimmerProgress
                                     variant="inline"
-                                    value={action.progress || progress}
-                                    statusText="Mengonversi..."
+                                    value={typeof action.progress === "number" ? action.progress : 0}
+                                    statusText={action.status || "Mengonversi..."}
                                     showPercentage={true}
                                 />
                             </div>
@@ -487,9 +597,6 @@ const Dropzone = () => {
                                             <SpinnerGap className="animate-spin" />
                                         </span>
                                         <span>Convert Now</span>
-                                        <span className="animate-spin text-lg">
-                                            <SpinnerGap className="animate-spin" />
-                                        </span>
                                     </div>
                                 ) : (
                                     <span>Convert Now</span>

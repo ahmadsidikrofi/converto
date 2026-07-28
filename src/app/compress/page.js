@@ -5,13 +5,11 @@ const CompressPage = () => {
     return (
         <main className="flex flex-col items-center p-10">
             <Header 
-                title="Minimize Image In Second"
-                description="Gak perlu khawatir soal ukuran file lagi! Dengan Converto, 
-                    kamu bisa kompres gambar jadi lebih kecil tanpa mengorbankan kualitas.
-                    Simpan space, stay sharp, dan siap untuk dipamerkan ke mana saja! Compress now and Tadaa🤩"
+                title="Ultra-Fast Media & Video Compressor"
+                description="Kompres video 4K & gambar raksasa Anda secara instan di peramban tanpa mengunggah berkas ke server. Dapatkan ukuran di bawah 25MB untuk WhatsApp & Email dengan sekali klik tanpa kehilangan kualitas!"
             />
 
-            <div className="mt-16 text-center lg:max-w-5xl lg:w-full">
+            <div className="mt-12 text-center lg:max-w-5xl lg:w-full">
                 <DropzoneCompressor />
             </div>
         </main>

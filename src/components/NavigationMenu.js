@@ -47,10 +47,8 @@ const NavMenuTab = () => {
                                 </ListItem>
                             </Link>
                             <Link href="/compress">
-                                <ListItem title="Image Reducer">
-                                    Gak perlu khawatir soal ukuran file lagi! Dengan Converto,
-                                    kamu bisa kompres gambar jadi lebih kecil tanpa mengorbankan kualitas.
-                                    Simpan space, stay sharp, dan siap untuk dipamerkan ke mana saja! Compress now and Tadaa🤩
+                                <ListItem title="Media & Video Compressor">
+                                    Kompres video raksasa & gambar Anda ke bawah 25MB (WhatsApp/Email) secara instan tanpa mengunggah file!
                                 </ListItem>
                             </Link>
                             <Link href="/">
