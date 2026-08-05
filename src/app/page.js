@@ -1,4 +1,3 @@
-'use client'
 import HeroSection from "@/components/landing/HeroSection"
 import ValueProp from "@/components/landing/ValueProp"
 import Manifesto from "@/components/landing/Manifesto"

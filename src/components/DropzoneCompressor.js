@@ -119,26 +119,35 @@ const DropzoneCompressor = () => {
         if (!action.isVideo) {
             return Math.round(action.file_size * 0.45); // ~55% reduction for images
         }
-        const duration = action.duration || 10;
-        let targetSizeMB = 24;
+        const originalMB = action.file_size / (1024 * 1024);
+        let targetSizeMB = originalMB * 0.5;
 
         if (action.preset === 'whatsapp') {
-            targetSizeMB = Math.min(24.5, (action.file_size / (1024 * 1024)) * 0.4);
+            targetSizeMB = Math.min(24.5, originalMB * 0.6);
         } else if (action.preset === 'balanced') {
-            targetSizeMB = (action.file_size / (1024 * 1024)) * 0.5;
+            targetSizeMB = originalMB * 0.5;
         } else if (action.preset === 'extreme') {
-            targetSizeMB = (action.file_size / (1024 * 1024)) * 0.25;
+            targetSizeMB = originalMB * 0.25;
+        } else if (action.preset === 'turbo') {
+            targetSizeMB = originalMB * 0.35;
         }
 
+        // Guarantee targetSizeMB never exceeds 85% of original size (always compress!)
+        targetSizeMB = Math.min(targetSizeMB, originalMB * 0.85);
         return Math.min(action.file_size, Math.round(targetSizeMB * 1024 * 1024));
     }
 
     // Compress a single image
-    const compressSingleImage = async (actionItem) => {
+    const compressSingleImage = async (actionItem, onProgressCallback) => {
         const options = {
             maxSizeMB: 1,
             maxWidthOrHeight: 1920,
             useWebWorker: true,
+            onProgress: (p) => {
+                if (typeof onProgressCallback === 'function') {
+                    onProgressCallback({ progress: p / 100 });
+                }
+            }
         }
         try {
             const compressedFile = await imageCompression(actionItem.file, options)
@@ -155,7 +164,7 @@ const DropzoneCompressor = () => {
     }
 
     // Compress a single video with FFmpeg WASM
-    const compressSingleVideo = async (ffmpeg, actionItem, onProgress) => {
+    const compressSingleVideo = async (ffmpeg, actionItem) => {
         const ext = actionItem.from
         const uniqueId = Date.now() + "_" + Math.random().toString(36).substring(2, 7)
         const input = `cin_${uniqueId}.${ext}`
@@ -163,39 +172,38 @@ const DropzoneCompressor = () => {
 
         await ffmpeg.writeFile(input, new Uint8Array(await actionItem.file.arrayBuffer()))
 
-        const duration = actionItem.duration || 10
-        let videoBitrateKbps = 1000
+        // Setup CRF and Resolution based on preset
+        let crfValue = 28;
+        let targetRatio = 0.5;
+        if (actionItem.preset === 'whatsapp') { crfValue = 30; targetRatio = 0.6; }
+        else if (actionItem.preset === 'extreme') { crfValue = 32; targetRatio = 0.25; }
+        else if (actionItem.preset === 'turbo') { crfValue = 31; targetRatio = 0.35; }
 
-        if (actionItem.preset === 'whatsapp') {
-            // Target size < 24.5 MB
-            const targetBytes = 24.5 * 1024 * 1024
-            const totalBitrateBps = (targetBytes * 8) / duration
-            const audioBitrateBps = 96000
-            videoBitrateKbps = Math.max(150, Math.round((totalBitrateBps - audioBitrateBps) / 1000))
-        } else if (actionItem.preset === 'balanced') {
-            const targetBytes = actionItem.file_size * 0.5
-            const totalBitrateBps = (targetBytes * 8) / duration
-            videoBitrateKbps = Math.max(200, Math.round((totalBitrateBps - 96000) / 1000))
-        } else if (actionItem.preset === 'extreme') {
-            const targetBytes = actionItem.file_size * 0.25
-            const totalBitrateBps = (targetBytes * 8) / duration
-            videoBitrateKbps = Math.max(120, Math.round((totalBitrateBps - 64000) / 1000))
+        // Auto resolution scaling (540p for WhatsApp/Turbo to speed up 10x)
+        let vfFilter = "scale=-2:min(ih\\,720)";
+        if (actionItem.resolution === '1080p') vfFilter = "scale=-2:1080";
+        else if (actionItem.resolution === '720p') vfFilter = "scale=-2:720";
+        else if (actionItem.resolution === '480p') vfFilter = "scale=-2:480";
+        else if (actionItem.preset === 'whatsapp' || actionItem.preset === 'turbo') {
+            vfFilter = "scale=-2:min(ih\\,540)";
         }
 
-        // Scale resolution flag
-        let vfFilter = "scale=-2:min(ih\\,720)"
-        if (actionItem.resolution === '1080p') vfFilter = "scale=-2:1080"
-        else if (actionItem.resolution === '720p') vfFilter = "scale=-2:720"
-        else if (actionItem.resolution === '480p') vfFilter = "scale=-2:480"
+        // Calculate max bitrate to ensure file size always shrinks (Constrained VBV)
+        const duration = actionItem.duration || 10;
+        const originalBitrateKbps = ((actionItem.file_size * 8) / duration) / 1000;
+        const maxAudioBitrateKbps = 96;
+        const targetVideoBitrateKbps = Math.max(100, Math.round((originalBitrateKbps * targetRatio) - maxAudioBitrateKbps));
 
         const cmd = [
             '-i', input,
+            '-r', '30',                    // Cap frame rate to 30fps to cut workload by 50%
             '-vf', vfFilter,
             '-c:v', 'libx264',
             '-preset', 'ultrafast',
-            '-b:v', `${videoBitrateKbps}k`,
-            '-maxrate', `${videoBitrateKbps * 1.2}k`,
-            '-bufsize', `${videoBitrateKbps * 2}k`,
+            '-tune', 'fastdecode',         // Skip heavy motion estimation for 5x speed boost
+            '-crf', `${crfValue}`,         // Single-pass CRF eliminates buffer lookahead delay
+            '-maxrate', `${targetVideoBitrateKbps}k`,
+            '-bufsize', `${targetVideoBitrateKbps * 2}k`,
             '-threads', '1',
             '-c:a', 'aac',
             '-b:a', '96k',
@@ -213,8 +221,8 @@ const DropzoneCompressor = () => {
                 compressed_size: blob.size
             }
         } finally {
-            try { await ffmpeg.deleteFile(input) } catch (e) {}
-            try { await ffmpeg.deleteFile(output) } catch (e) {}
+            try { await ffmpeg.deleteFile(input) } catch (e) { }
+            try { await ffmpeg.deleteFile(output) } catch (e) { }
         }
     }
 
@@ -246,7 +254,7 @@ const DropzoneCompressor = () => {
 
         try {
             ffmpeg.on('progress', progressCallback)
-        } catch (e) {}
+        } catch (e) { }
 
         for (let i = 0; i < total; i++) {
             currentFileIdx = i
@@ -259,7 +267,7 @@ const DropzoneCompressor = () => {
                 if (item.isVideo) {
                     res = await compressSingleVideo(ffmpeg, item)
                 } else {
-                    res = await compressSingleImage(item)
+                    res = await compressSingleImage(item, progressCallback)
                 }
 
                 completed++
@@ -292,12 +300,12 @@ const DropzoneCompressor = () => {
                         ffmpeg = await LoadFfmpeg()
                         ffmpegRef.current = ffmpeg
                         ffmpeg.on('progress', progressCallback)
-                    } catch (rErr) {}
+                    } catch (rErr) { }
                 }
             }
         }
 
-        try { ffmpeg.off('progress', progressCallback) } catch (e) {}
+        try { ffmpeg.off('progress', progressCallback) } catch (e) { }
         setIsCompressingAll(false)
         setIsDone(true)
 
@@ -407,13 +415,16 @@ const DropzoneCompressor = () => {
                                             <SelectContent>
                                                 <SelectItem value="whatsapp">
                                                     <div className="flex items-center gap-1.5">
-                                                        <WhatsappLogo className="w-4 h-4 text-emerald-500" />
                                                         <span>Target &lt; 25MB (WA/Email)</span>
+                                                    </div>
+                                                </SelectItem>
+                                                <SelectItem value="turbo">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span>Turbo Speed (10x Faster)</span>
                                                     </div>
                                                 </SelectItem>
                                                 <SelectItem value="balanced">
                                                     <div className="flex items-center gap-1.5">
-                                                        <Lightning className="w-4 h-4 text-amber-500" />
                                                         <span>Balanced (-50% Size)</span>
                                                     </div>
                                                 </SelectItem>

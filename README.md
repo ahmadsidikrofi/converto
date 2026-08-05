@@ -1,7 +1,7 @@
 <div align="center">
   <img src="public/Converto-logo.png" alt="Converto Logo" width="80" />
   <h1>Converto</h1>
-  <p><strong>Infinite Free Multimedia Converter & Ultra-Fast Video Compressor — Convert & Compress images, audio, and video with no limits.</strong></p>
+  <p><strong>Infinite Free Multimedia Converter & Ultra-Fast Video Compressor - Convert & Compress images, audio, and video with no limits.</strong></p>
 
   <p>
     <a href="https://converto-bay.vercel.app/">🌐 Live Demo</a> ·
