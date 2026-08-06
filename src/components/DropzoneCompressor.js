@@ -1,7 +1,7 @@
 'use client'
 import { TrashIcon, CheckCircledIcon } from "@radix-ui/react-icons"
 import ReactDropzone from "react-dropzone"
-import { toast, useToast } from "./ui/use-toast"
+import { toast } from "sonner"
 import { useEffect, useRef, useState } from "react"
 import IconFile from "../../utils/icon-file"
 import CompressFileName from "../../utils/compress-file-name"
@@ -44,7 +44,6 @@ const getVideoMetadata = (file) => {
 };
 
 const DropzoneCompressor = () => {
-    const { toast } = useToast()
     const [isHover, setIsHover] = useState(false)
     const [actions, setActions] = useState([])
     const [isDone, setIsDone] = useState(false)
@@ -70,12 +69,22 @@ const DropzoneCompressor = () => {
 
     const handleUpload = async (data) => {
         handleExitHover()
-        setFiles(data)
 
         const tmp = []
+        const validFiles = []
+        let hasTooSmallVideo = false
+
         for (const file of data) {
             const ext = file.name.slice(((file.name.lastIndexOf(".") - 1) >>> 0) + 2).toLowerCase()
             const isVideo = extensions.video.includes(ext) || file.type.includes('video')
+
+            // Reject videos under 10 MB
+            if (isVideo && file.size < 10 * 1024 * 1024) {
+                hasTooSmallVideo = true
+                continue
+            }
+
+            validFiles.push(file)
 
             let meta = { duration: 10, width: 1280, height: 720 }
             if (isVideo) {
@@ -92,7 +101,7 @@ const DropzoneCompressor = () => {
                 duration: meta.duration,
                 width: meta.width,
                 height: meta.height,
-                preset: isVideo ? "whatsapp" : "balanced", // Default video preset: <25MB WhatsApp
+                preset: isVideo ? "whatsapp" : "balanced",
                 resolution: "auto",
                 is_compressed: false,
                 is_compressing: false,
@@ -103,8 +112,19 @@ const DropzoneCompressor = () => {
                 compressed_size: null,
             })
         }
-        setActions(tmp)
-        setIsDone(false)
+
+        if (hasTooSmallVideo) {
+            toast.error('Video terlalu kecil (< 10 MB)', {
+                description: 'Berkas video di bawah 10 MB sudah cukup kecil dan tidak perlu dikompresi.',
+                duration: 5000,
+            })
+        }
+
+        if (tmp.length > 0) {
+            setFiles(validFiles)
+            setActions(tmp)
+            setIsDone(false)
+        }
     }
 
     const handlePresetChange = (fileName, presetValue) => {
@@ -172,27 +192,33 @@ const DropzoneCompressor = () => {
 
         await ffmpeg.writeFile(input, new Uint8Array(await actionItem.file.arrayBuffer()))
 
-        // Setup CRF and Resolution based on preset
-        let crfValue = 28;
-        let targetRatio = 0.5;
-        if (actionItem.preset === 'whatsapp') { crfValue = 30; targetRatio = 0.6; }
-        else if (actionItem.preset === 'extreme') { crfValue = 32; targetRatio = 0.25; }
-        else if (actionItem.preset === 'turbo') { crfValue = 31; targetRatio = 0.35; }
+        // Setup exact target size based on preset
+        const duration = actionItem.duration || 10;
+        const originalMB = actionItem.file_size / (1024 * 1024);
+        let targetSizeMB = originalMB * 0.5;
 
-        // Auto resolution scaling (540p for WhatsApp/Turbo to speed up 10x)
+        if (actionItem.preset === 'whatsapp') {
+            targetSizeMB = Math.min(24.5, originalMB * 0.6);
+        } else if (actionItem.preset === 'extreme') {
+            targetSizeMB = originalMB * 0.25;
+        } else if (actionItem.preset === 'turbo') {
+            targetSizeMB = originalMB * 0.35;
+        }
+        targetSizeMB = Math.min(targetSizeMB, originalMB * 0.85);
+
+        // Convert target size to accurate bitrate
+        const targetBytes = targetSizeMB * 1024 * 1024;
+        const totalBitrateBps = (targetBytes * 8) / duration;
+        const targetVideoBitrateKbps = Math.max(100, Math.round((totalBitrateBps - 96000) / 1000));
+
+        // Auto resolution scaling
         let vfFilter = "scale=-2:min(ih\\,720)";
         if (actionItem.resolution === '1080p') vfFilter = "scale=-2:1080";
         else if (actionItem.resolution === '720p') vfFilter = "scale=-2:720";
         else if (actionItem.resolution === '480p') vfFilter = "scale=-2:480";
         else if (actionItem.preset === 'whatsapp' || actionItem.preset === 'turbo') {
-            vfFilter = "scale=-2:min(ih\\,540)";
+            if (originalMB > 50) vfFilter = "scale=-2:min(ih\\,540)";
         }
-
-        // Calculate max bitrate to ensure file size always shrinks (Constrained VBV)
-        const duration = actionItem.duration || 10;
-        const originalBitrateKbps = ((actionItem.file_size * 8) / duration) / 1000;
-        const maxAudioBitrateKbps = 96;
-        const targetVideoBitrateKbps = Math.max(100, Math.round((originalBitrateKbps * targetRatio) - maxAudioBitrateKbps));
 
         const cmd = [
             '-i', input,
@@ -201,8 +227,8 @@ const DropzoneCompressor = () => {
             '-c:v', 'libx264',
             '-preset', 'ultrafast',
             '-tune', 'fastdecode',         // Skip heavy motion estimation for 5x speed boost
-            '-crf', `${crfValue}`,         // Single-pass CRF eliminates buffer lookahead delay
-            '-maxrate', `${targetVideoBitrateKbps}k`,
+            '-b:v', `${targetVideoBitrateKbps}k`,
+            '-maxrate', `${Math.round(targetVideoBitrateKbps * 1.5)}k`,
             '-bufsize', `${targetVideoBitrateKbps * 2}k`,
             '-threads', '1',
             '-c:a', 'aac',
@@ -309,8 +335,7 @@ const DropzoneCompressor = () => {
         setIsCompressingAll(false)
         setIsDone(true)
 
-        toast({
-            title: "Compression Completed 🎉",
+        toast.success("Compression Completed", {
             description: "Seluruh media Anda berhasil diperkecil dengan sukses!",
             duration: 4000
         })
@@ -544,9 +569,7 @@ const DropzoneCompressor = () => {
             accept={accepted_files}
             onDropRejected={() => {
                 handleExitHover()
-                toast({
-                    variant: 'destructive',
-                    title: 'Format berkas tidak didukung',
+                toast.error('Format berkas tidak didukung', {
                     description: 'Silahkan upload file gambar (PNG/JPG/WEBP) atau video (MP4/MOV/MKV/WEBM).',
                     duration: 4000,
                 })
