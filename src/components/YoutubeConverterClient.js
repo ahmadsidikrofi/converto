@@ -137,7 +137,34 @@ export default function YoutubeConverterClient() {
     }
 
     return (
-        <div className="w-full mx-auto space-y-10">
+        <div className="w-full mx-auto space-y-8">
+            {/* Maintenance & Coming Soon Banner */}
+            <div className="max-w-3xl mx-auto p-6 sm:p-8 rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-card to-orange-500/5 backdrop-blur-md shadow-xl text-center relative overflow-hidden space-y-6">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-semibold tracking-wide uppercase">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+                    Pemeliharaan Server & Optimasi Cloud
+                </div>
+                
+                <div className="space-y-3 max-w-xl mx-auto">
+                    <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                        Fitur YouTube Converter Sedang Dioptimalkan
+                    </h2>
+                    <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                        Kami sedang memperbarui infrastruktur serverless agar pengunduhan video YouTube dapat menembus proteksi batasan cloud secara stabil. Fitur ini akan segera diaktifkan kembali!
+                    </p>
+                </div>
+
+                <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+                    <a
+                        href="/"
+                        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all shadow-md"
+                    >
+                        Gunakan File Converter (100% Aktif)
+                    </a>
+                </div>
+            </div>
+
             {/* Form Input Section */}
             <form onSubmit={fetchVideoInfo} className="relative group max-w-3xl mx-auto">
                 <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-orange-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-50"></div>
