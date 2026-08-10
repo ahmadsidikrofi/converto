@@ -4,7 +4,7 @@ import { useState } from "react"
 import ReactDropzone from "react-dropzone"
 import { FilePdf, UploadSimple, ShieldCheck, PenNib, QrCode } from "@phosphor-icons/react"
 import dynamic from "next/dynamic"
-import { useToast } from "@/components/ui/use-toast"
+import { appToast as toast } from "@/store/useToastStore"
 
 const PdfSignEditor = dynamic(() => import("@/components/PdfSignEditor"), {
     ssr: false,
@@ -20,7 +20,6 @@ const PdfSignEditor = dynamic(() => import("@/components/PdfSignEditor"), {
 
 const SignYourPdfPage = () => {
     const [file, setFile] = useState(null)
-    const { toast } = useToast()
 
     const handleUpload = (acceptedFiles) => {
         if (acceptedFiles && acceptedFiles.length > 0) {

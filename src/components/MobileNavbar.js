@@ -54,6 +54,9 @@ const MobileNavbar = () => {
                                 <Link href="/sign-your-pdf">
                                     <Button variant="ghost" className="text-sm lg:text-lg font-medium">e-Sign PDF</Button>
                                 </Link>
+                                <Link href="/youtube-converter">
+                                    <Button variant="ghost" className="text-sm lg:text-lg font-medium">Youtube Converter</Button>
+                                </Link>
                                 <Link href="/about">
                                     <Button variant="ghost" className="text-md font-medium">About</Button>
                                 </Link>

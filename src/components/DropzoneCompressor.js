@@ -1,7 +1,7 @@
 'use client'
 import { TrashIcon, CheckCircledIcon } from "@radix-ui/react-icons"
 import ReactDropzone from "react-dropzone"
-import { toast } from "sonner"
+import { appToast as toast } from "@/store/useToastStore"
 import { useEffect, useRef, useState } from "react"
 import IconFile from "../../utils/icon-file"
 import CompressFileName from "../../utils/compress-file-name"

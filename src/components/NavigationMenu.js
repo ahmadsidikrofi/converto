@@ -77,6 +77,11 @@ const NavMenuTab = () => {
                                     Lengkap dengan QR Code verifikasi bebas ojek dokumen fisik!
                                 </ListItem>
                             </Link>
+                            <Link href="/youtube-converter">
+                                <ListItem title="Youtube Converter">
+                                    Download video dari Youtube dengan kualitas terbaik
+                                </ListItem>
+                            </Link>
                         </ul>
                     </NavigationMenuContent>
                 </NavigationMenuItem>

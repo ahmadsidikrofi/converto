@@ -13,7 +13,7 @@ import { PDFDocument } from 'pdf-lib';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { FilePdf, PenNib, QrCode, DownloadSimple, ArrowLeft, ArrowRight, X, Trash, ArrowCounterClockwise, Info } from '@phosphor-icons/react';
-import { toast } from 'sonner';
+import { appToast as toast } from "@/store/useToastStore";
 
 // Setup pdf.js worker using CDN (Safe for Next.js build)
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;

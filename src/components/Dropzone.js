@@ -11,7 +11,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Button } from "./ui/button"
-import { useToast } from "./ui/use-toast"
+import { appToast as toast } from "@/store/useToastStore"
 import ReactDropzone from "react-dropzone";
 import ByteToSize from "../../utils/byte-to-size";
 import LoadFfmpeg from "../../utils/load-ffmpeg"
@@ -58,7 +58,6 @@ const formatETA = (seconds) => {
 };
 
 const Dropzone = () => {
-    const { toast } = useToast()
     const [isHover, setIsHover] = useState(false)
     const [actions, setActions] = useState([])
     const [isReady, setIsReady] = useState(false)

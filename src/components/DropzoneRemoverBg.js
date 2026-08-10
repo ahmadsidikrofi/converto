@@ -3,7 +3,7 @@ import { FilePng, SpinnerGap, TrayArrowUp } from "@phosphor-icons/react"
 import { useEffect, useRef, useState } from "react"
 import ReactDropzone from "react-dropzone"
 import LoadFfmpeg from "../../utils/load-ffmpeg"
-import { useToast } from "./ui/use-toast"
+import { appToast as toast } from "@/store/useToastStore"
 import CompressFileName from "../../utils/compress-file-name"
 import ByteToSize from "../../utils/byte-to-size"
 import { Button } from "./ui/button"
@@ -13,7 +13,6 @@ import Image from "next/image"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const DropzoneRemoverBg = () => {
-    const { toast } = useToast()
     const [isHover, setIsHover] = useState(false)
     const [actions, setActions] = useState([])
     const [isDone, setIsDone] = useState(false)
