@@ -14,9 +14,9 @@ import { cn } from "@/lib/utils"
 
 // Slide variants for tabs
 const variants = {
-  enter: (dir) => ({ x: dir > 0 ? 48 : -48, opacity: 0 }),
-  center: { x: 0, opacity: 1 },
-  exit: (dir) => ({ x: dir > 0 ? -48 : 48, opacity: 0 })
+    enter: (dir) => ({ x: dir > 0 ? 48 : -48, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir) => ({ x: dir > 0 ? -48 : 48, opacity: 0 })
 }
 const transition = { type: "spring", stiffness: 340, damping: 32 }
 
@@ -99,7 +99,7 @@ export default function YoutubeConverterClient() {
 
         try {
             const response = await fetch(downloadUrl)
-            
+
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({}))
                 throw new Error(errData.error || "Gagal mendownload file")
@@ -123,7 +123,7 @@ export default function YoutubeConverterClient() {
             document.body.appendChild(a)
             a.click()
             document.body.removeChild(a)
-            
+
             // Cleanup blob URL setelah beberapa detik
             setTimeout(() => window.URL.revokeObjectURL(blobUrl), 5000)
 
@@ -140,12 +140,6 @@ export default function YoutubeConverterClient() {
         <div className="w-full mx-auto space-y-8">
             {/* Maintenance & Coming Soon Banner */}
             <div className="max-w-3xl mx-auto p-6 sm:p-8 rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-card to-orange-500/5 backdrop-blur-md shadow-xl text-center relative overflow-hidden space-y-6">
-                <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-semibold tracking-wide uppercase">
-                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-                    Pemeliharaan Server & Optimasi Cloud
-                </div>
-                
                 <div className="space-y-3 max-w-xl mx-auto">
                     <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
                         Fitur YouTube Converter Sedang Dioptimalkan
@@ -243,13 +237,13 @@ export default function YoutubeConverterClient() {
                         {/* Format Tabs (MP4 vs MP3) */}
                         <div className="mt-8 flex-1">
                             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                                <TabsList 
+                                <TabsList
                                     className="flex w-full border-b border-border bg-transparent p-0 rounded-none h-auto gap-0 justify-start"
                                     onMouseLeave={() => setHoveredTab(null)}
                                 >
                                     {/* Tab MP4 */}
-                                    <TabsTrigger 
-                                        value="mp4" 
+                                    <TabsTrigger
+                                        value="mp4"
                                         onMouseEnter={() => setHoveredTab('mp4')}
                                         className={cn(
                                             "relative flex items-center cursor-pointer justify-center text-sm font-medium transition-colors outline-none whitespace-nowrap bg-transparent",
@@ -272,8 +266,8 @@ export default function YoutubeConverterClient() {
                                     </TabsTrigger>
 
                                     {/* Tab MP3 */}
-                                    <TabsTrigger 
-                                        value="mp3" 
+                                    <TabsTrigger
+                                        value="mp3"
                                         onMouseEnter={() => setHoveredTab('mp3')}
                                         className={cn(
                                             "relative flex items-center cursor-pointer justify-center text-sm font-medium transition-colors outline-none whitespace-nowrap bg-transparent",
@@ -295,7 +289,7 @@ export default function YoutubeConverterClient() {
                                         )}
                                     </TabsTrigger>
                                 </TabsList>
-                                
+
                                 {/* Animated Content */}
                                 <div className="mt-6 relative overflow-hidden min-h-[100px]">
                                     <AnimatePresence mode="wait" custom={direction}>
@@ -333,7 +327,7 @@ export default function YoutubeConverterClient() {
                                                 </div>
                                             </motion.div>
                                         )}
-                                        
+
                                         {activeTab === 'mp3' && (
                                             <motion.div
                                                 key="mp3"

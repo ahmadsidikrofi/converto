@@ -12,6 +12,7 @@ import {
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"
 import Link from "next/link";
 import Image from 'next/image';
+import { Button } from './ui/button';
 
 // Start of Selection
 const NavMenuTab = () => {
@@ -51,7 +52,7 @@ const NavMenuTab = () => {
                                     Kompres video raksasa & gambar Anda ke bawah 25MB (WhatsApp/Email) secara instan tanpa mengunggah file!
                                 </ListItem>
                             </Link>
-                            <Link href="/">
+                            <Link href="/convert">
                                 <ListItem title="Convert Files">
                                     Buka potensi kreativitasmu dengan Converto –
                                     platform online andalan buat konversi multimedia.
@@ -77,11 +78,11 @@ const NavMenuTab = () => {
                                     Lengkap dengan QR Code verifikasi bebas ojek dokumen fisik!
                                 </ListItem>
                             </Link>
-                            <Link href="/youtube-converter">
+                            <div className="opacity-50 cursor-not-allowed pointer-events-none select-none">
                                 <ListItem title="Youtube Converter">
-                                    Download video dari Youtube dengan kualitas terbaik
+                                    Download video dari Youtube dengan kualitas terbaik (Fitur ini sedang dalam pemeliharaan)
                                 </ListItem>
-                            </Link>
+                            </div>
                         </ul>
                     </NavigationMenuContent>
                 </NavigationMenuItem>

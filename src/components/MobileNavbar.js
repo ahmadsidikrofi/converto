@@ -54,9 +54,9 @@ const MobileNavbar = () => {
                                 <Link href="/sign-your-pdf">
                                     <Button variant="ghost" className="text-sm lg:text-lg font-medium">e-Sign PDF</Button>
                                 </Link>
-                                <Link href="/youtube-converter">
-                                    <Button variant="ghost" className="text-sm lg:text-lg font-medium">Youtube Converter</Button>
-                                </Link>
+                                <div className="opacity-50 pointer-events-none cursor-not-allowed">
+                                    <Button variant="ghost" disabled className="text-sm lg:text-lg font-medium">Youtube Converter</Button>
+                                </div>
                                 <Link href="/about">
                                     <Button variant="ghost" className="text-md font-medium">About</Button>
                                 </Link>
