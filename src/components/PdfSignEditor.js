@@ -16,11 +16,44 @@ import { appToast as toast } from "@/store/useToastStore";
 // Setup pdf.js worker using CDN (Safe for Next.js build)
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-// Fungsi Hashing SHA-256
+// Helper untuk konversi DataURL (base64) ke Uint8Array secara aman
+function dataUrlToUint8Array(dataUrl) {
+    if (!dataUrl || typeof dataUrl !== 'string') return null
+    try {
+        const base64Index = dataUrl.indexOf(',')
+        const base64 = base64Index !== -1 ? dataUrl.slice(base64Index + 1) : dataUrl
+        const cleanBase64 = base64.replace(/[\s\r\n]+/g, '')
+        const binaryString = atob(cleanBase64)
+        const bytes = new Uint8Array(binaryString.length)
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i)
+        }
+        return bytes
+    } catch (e) {
+        console.error("Gagal mendecode DataURL ke Uint8Array:", e)
+        return null
+    }
+}
+
+// Fungsi Hashing SHA-256 dengan fallback aman untuk non-HTTPS
 async function calculateSHA256(bufferSource) {
-    const hashBuffer = await crypto.subtle.digest('SHA-256', bufferSource);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    try {
+        if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
+            const hashBuffer = await window.crypto.subtle.digest('SHA-256', bufferSource)
+            const hashArray = Array.from(new Uint8Array(hashBuffer))
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+        }
+    } catch (e) {
+        console.warn("Crypto subtle SHA-256 fallback triggered:", e)
+    }
+    // Fallback hash jika crypto.subtle tidak tersedia (non-HTTPS / webview)
+    let hash = 0
+    const bytes = new Uint8Array(bufferSource)
+    for (let i = 0; i < bytes.length; i++) {
+        hash = ((hash << 5) - hash) + bytes[i]
+        hash |= 0
+    }
+    return Math.abs(hash).toString(16).padStart(16, '0') + Date.now().toString(16)
 }
 
 const PdfSignEditor = ({ file, onReset }) => {
@@ -102,10 +135,14 @@ const PdfSignEditor = ({ file, onReset }) => {
         }
 
         setElements(prev => [...prev, ...newElements])
+        // toast.success("Tanda tangan berhasil ditempel ke dokumen!", {
+        //     position: 'top-center',
+        //     style: { background: "#dcfce7", color: "#166534", border: "1px solid #4ade80" },
+        // })
     }
 
     const handleFinishAndDownload = async () => {
-        if (!signerName.trim()) {
+        if (!signerName || !signerName.trim()) {
             toast.info("Mohon masukkan nama penandatangan terlebih dahulu", {
                 position: 'top-center',
                 style: { background: "#fee2e2", color: "#991b1b", border: "1px solid #b91c1c" },
@@ -113,7 +150,7 @@ const PdfSignEditor = ({ file, onReset }) => {
             return
         }
 
-        if (!signatureData) {
+        if (!signatureData && elements.length === 0) {
             toast.info("Mohon klik 'Buat Tanda Tangan' terlebih dahulu", {
                 position: 'top-center',
                 style: { background: "#fee2e2", color: "#991b1b", border: "1px solid #b91c1c" },
@@ -126,12 +163,14 @@ const PdfSignEditor = ({ file, onReset }) => {
         try {
             // 1. Baca file PDF asli
             const arrayBuffer = await file.arrayBuffer()
-            const pdfDoc = await PDFDocument.load(arrayBuffer)
+            const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true })
+            const pages = pdfDoc.getPages()
 
             // 2. Loop semua elemen (TTD & QR) dan tempel ke halaman yang tepat
             for (const el of elements) {
-                const pageIndex = el.page - 1
-                const pages = pdfDoc.getPages()
+                const pageIndex = (el.page || 1) - 1
+                if (pageIndex < 0 || pageIndex >= pages.length) continue
+
                 const page = pages[pageIndex]
 
                 // Kalkulasi rasio ukuran (PDF asli vs UI kita yang 800px)
@@ -139,33 +178,40 @@ const PdfSignEditor = ({ file, onReset }) => {
                 const pdfHeight = page.getHeight()
                 const scale = pdfWidth / 800
 
-                const actualWidth = el.width * scale
-                const actualHeight = el.height * scale
-                const actualX = el.x * scale
+                const actualWidth = (el.width || 150) * scale
+                const actualHeight = (el.height || 75) * scale
+                const actualX = (el.x || 50) * scale
                 // Koordinat Y pada PDF dimulai dari kiri bawah, jadi harus dibalik (height - Y - heightElement)
-                const actualY = pdfHeight - (el.y * scale) - actualHeight
+                const actualY = pdfHeight - ((el.y || 50) * scale) - actualHeight
 
-                let imageBytes;
+                let imageBytes = null
                 if (el.type === 'signature') {
-                    // Ambil base64 dari signature image
-                    const base64Data = el.content.split(',')[1]
-                    imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))
-
-                    const img = await pdfDoc.embedPng(imageBytes)
-                    page.drawImage(img, {
-                        x: actualX,
-                        y: actualY,
-                        width: actualWidth,
-                        height: actualHeight
-                    })
+                    imageBytes = dataUrlToUint8Array(el.content)
                 } else if (el.type === 'qrcode') {
-                    // Ambil base64 dari elemen Canvas QR Code di layar
-                    const canvas = document.getElementById(`qr-${el.id}`)
+                    const canvas = document.getElementById(`qr-offscreen-${el.id}`) || document.getElementById(`qr-${el.id}`)
                     if (canvas) {
-                        const base64Data = canvas.toDataURL('image/png').split(',')[1]
-                        imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))
+                        try {
+                            const dataUrl = canvas.toDataURL('image/png')
+                            imageBytes = dataUrlToUint8Array(dataUrl)
+                        } catch (canvasErr) {
+                            console.error("Gagal export QR canvas:", canvasErr)
+                        }
+                    }
+                }
 
-                        const img = await pdfDoc.embedPng(imageBytes)
+                if (imageBytes && imageBytes.length > 0) {
+                    let img = null
+                    try {
+                        img = await pdfDoc.embedPng(imageBytes)
+                    } catch (pngErr) {
+                        try {
+                            img = await pdfDoc.embedJpg(imageBytes)
+                        } catch (jpgErr) {
+                            console.error("Gagal embed gambar TTD/QR ke PDF:", pngErr, jpgErr)
+                        }
+                    }
+
+                    if (img) {
                         page.drawImage(img, {
                             x: actualX,
                             y: actualY,
@@ -179,36 +225,41 @@ const PdfSignEditor = ({ file, onReset }) => {
             // 3. Simpan (Merge) PDF ke dalam bentuk Bytes
             const pdfBytes = await pdfDoc.save()
 
-            // 4. Kalkulasi Hash SHA-256 dari PDF yang sudah final ditandatangani
-            const fileHash = await calculateSHA256(pdfBytes)
-
-            // 5. Simpan metadata & Hash ke Firestore
-            const docData = {
-                fileName: file.name,
-                signerName: signerName,
-                timestamp: new Date().toISOString(),
-                signatureImage: signatureData,
-                fileHash: fileHash // Kunci keamanan utama
-            }
-            await setDoc(doc(db, "verified_documents", docId), docData)
-
-            // 6. Unduh PDF ke komputer user
+            // 4. Unduh PDF ke komputer user langsung (prioritas utama)
             const blob = new Blob([pdfBytes], { type: 'application/pdf' })
             const link = document.createElement('a')
-            link.href = URL.createObjectURL(blob)
-            link.download = `Signed_${file.name}`
+            const blobUrl = URL.createObjectURL(blob)
+            link.href = blobUrl
+            const safeFileName = (file.name || 'document').replace(/\.pdf$/i, '')
+            link.download = `Signed_${safeFileName}.pdf`
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000)
 
-            toast.success(`PDF berhasil diunduh.\nSilakan buka file PDF-nya dan coba scan QR Codenya, atau buka tab baru ke:\n${window.location.origin}/verify/${docId}`, {
+            // 5. Kalkulasi Hash & Simpan metadata verifikasi ke Firestore (Non-blocking)
+            try {
+                const fileHash = await calculateSHA256(pdfBytes)
+                const docData = {
+                    fileName: file.name || "document.pdf",
+                    signerName: signerName,
+                    timestamp: new Date().toISOString(),
+                    signatureImage: signatureData || "",
+                    fileHash: fileHash
+                }
+                await setDoc(doc(db, "verified_documents", docId), docData, { merge: true })
+            } catch (dbErr) {
+                console.warn("Gagal menyimpan metadata verifikasi ke Firestore (PDF tetap terunduh):", dbErr)
+            }
+
+            toast.success(`PDF berhasil ditandatangani & diunduh`, {
                 position: 'top-center',
                 style: { background: "#dcfce7", color: "#166534", border: "1px solid #4ade80" },
             })
 
         } catch (error) {
-            console.error("Error saat merge PDF:", error)
-            toast.error("Terjadi kesalahan saat memproses PDF. Silakan coba lagi.", {
+            console.error("Error saat memproses PDF:", error)
+            toast.error("Terjadi kesalahan saat memproses file PDF: " + (error?.message || "Silakan coba lagi"), {
                 position: 'top-center',
                 style: { background: "#fee2e2", color: "#991b1b", border: "1px solid #b91c1c" },
             })
@@ -359,6 +410,18 @@ const PdfSignEditor = ({ file, onReset }) => {
                             </Rnd>
                         ))}
                     </div>
+                </div>
+
+                {/* Hidden Offscreen QR Code container so QR codes from all pages are always present in DOM */}
+                <div className="fixed -left-[9999px] -top-[9999px] pointer-events-none opacity-0 invisible" aria-hidden="true">
+                    {elements.filter(el => el.type === 'qrcode').map((el) => (
+                        <QRCodeCanvas
+                            key={`offscreen-qr-${el.id}`}
+                            id={`qr-offscreen-${el.id}`}
+                            value={el.content}
+                            size={512}
+                        />
+                    ))}
                 </div>
 
                 {/* ========== FLOATING SIDEBAR CARD (Desktop - Sticky on right) ========== */}

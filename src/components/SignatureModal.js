@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { useAuth } from "@/lib/contexts/AuthContext"
 import { db } from "@/lib/firebase"
-import { doc, updateDoc, getDoc } from "firebase/firestore"
+import { doc, setDoc, getDoc } from "firebase/firestore"
 import { appToast as toast } from "@/store/useToastStore"
 import {
     PenNib,
@@ -16,10 +16,8 @@ import {
     FloppyDisk,
     CheckCircle,
     Trash,
-    CloudCheck,
-    DeviceMobile
 } from "@phosphor-icons/react"
-import { PenLine } from "lucide-react"
+import { Pen } from 'lucide-react';
 
 const LOCAL_STORAGE_KEY = "converto_saved_signature"
 const LOCAL_STORAGE_NAME_KEY = "converto_saved_signer_name"
@@ -105,11 +103,11 @@ export default function SignatureModal({
             setIsSavingCloud(true)
             try {
                 const userDocRef = doc(db, "users", user.uid)
-                await updateDoc(userDocRef, {
+                await setDoc(userDocRef, {
                     savedSignature: dataURL,
                     savedSignerName: signerName || "",
                     savedSignatureUpdatedAt: new Date().toISOString()
-                })
+                }, { merge: true })
             } catch (err) {
                 console.error("Gagal simpan tanda tangan ke Firestore:", err)
             } finally {
@@ -127,11 +125,15 @@ export default function SignatureModal({
 
             if (user?.uid) {
                 const userDocRef = doc(db, "users", user.uid)
-                await updateDoc(userDocRef, {
+                await setDoc(userDocRef, {
                     savedSignature: null,
                     savedSignatureUpdatedAt: new Date().toISOString()
-                })
+                }, { merge: true })
             }
+            toast.success("Tanda tangan tersimpan berhasil dihapus", {
+                position: 'top-center',
+                style: { background: "#dcfce7", color: "#166534", border: "1px solid #4ade80" },
+            })
         } catch (error) {
             console.error("Gagal menghapus TTD:", error)
             toast.error("Gagal menghapus tanda tangan tersimpan")
@@ -198,7 +200,7 @@ export default function SignatureModal({
                                 value="draw"
                                 className="rounded-lg text-xs sm:text-sm font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs flex items-center gap-1.5"
                             >
-                                <PenLine className="w-4 h-4 text-rose-500" weight="fill" />
+                                <Pen className="w-4 h-4 text-rose-500" weight="fill" />
                                 Gambar Baru
                             </TabsTrigger>
                         </TabsList>
